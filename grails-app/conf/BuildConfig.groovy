@@ -28,4 +28,9 @@ grails.project.dependency.resolution = {
 
         runtime 'org.scribe:scribe:1.2.3'
     }
+    plugins {
+
+        test ':spock:0.5-groovy-1.7'
+
+    }
 }
