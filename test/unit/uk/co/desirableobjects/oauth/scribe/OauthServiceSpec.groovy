@@ -11,6 +11,16 @@ import spock.lang.Unroll
 
 class OauthServiceSpec extends UnitSpec {
 
+    def 'Configuration is missing'() {
+
+        when:
+            new OauthService()
+
+        then:
+            thrown(IllegalStateException)
+
+    }
+
     @Unroll('Configuration contains #provider provider')
     def 'Configuration contains valid provider'() {
 
@@ -20,6 +30,8 @@ class OauthServiceSpec extends UnitSpec {
 
                 oauth {
                     provider = TwitterApi
+                    key = 'myKey'
+                    secret = 'mySecret'
                 }
             """
 
@@ -39,6 +51,8 @@ class OauthServiceSpec extends UnitSpec {
 
                     oauth {
                         provider = 'some custom string'
+                        key = 'myKey'
+                        secret = 'mySecret'
                     }
                 """
 
@@ -58,6 +72,8 @@ class OauthServiceSpec extends UnitSpec {
 
                     oauth {
                         provider = InvalidProviderApi
+                        key = 'myKey'
+                        secret = 'mySecret'
                     }
                 """
 
@@ -66,6 +82,54 @@ class OauthServiceSpec extends UnitSpec {
 
             then:
                 thrown(InvalidOauthProviderException)
+
+    }
+
+    @Unroll("Configuration is provided with invalid key (#key) or secret (#secret)")
+    def 'Configuration is missing keys and or secrets'() {
+
+
+        given:
+
+            mockConfig """
+                import org.scribe.builder.api.TwitterApi
+
+                oauth {
+                    provider = TwitterApi
+                    key = ${key}
+                    secret = ${secret}
+                }
+            """
+
+        when:
+
+            new OauthService()
+
+        then:
+
+            thrown(IllegalStateException)
+
+        where:
+
+            key     | secret
+            null    | "'secret'"
+            "'key'" | null
+            null    | null
+
+    }
+
+    def 'callback URL is supported but optional'() {
+
+        given:
+            mockConfig """
+                    import uk.co.desirableobjects.oauth.scribe.OauthServiceSpec.InvalidProviderApi
+
+                    oauth {
+                        provider = InvalidProviderApi
+                        key = 'myKey'
+                        secret = 'mySecret'
+                    }
+                """
 
     }
 
