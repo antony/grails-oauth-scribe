@@ -5,12 +5,19 @@ import org.scribe.model.Token
 import spock.lang.Shared
 import org.scribe.oauth.OAuthService
 import grails.plugin.spock.UnitSpec
+import org.scribe.model.Verifier
+
+import org.scribe.model.Verb
+import org.scribe.model.Response
+import org.springframework.http.HttpStatus
+import spock.lang.Unroll
 
 @Stepwise
 @Mixin(GMockAddon)
 class AuthorisationProcessSpec extends UnitSpec {
 
-        @Shared Token token
+        @Shared Token requestToken
+        @Shared Token accessToken
         @Shared OauthService oaService
 
         def 'a request token can be fetched'() {
@@ -33,11 +40,11 @@ class AuthorisationProcessSpec extends UnitSpec {
 
                 when:
                     simulate {
-                        token = oaService.requestToken
+                        requestToken = oaService.requestToken
                     }
 
                 then:
-                    token.rawResponse == 'c'
+                    requestToken.rawResponse == 'c'
 
         }
 
@@ -45,13 +52,80 @@ class AuthorisationProcessSpec extends UnitSpec {
 
             given:
 
-                oaService.service.getAuthorizationUrl(token).returns('http://example.org/auth')
+                oaService.service.getAuthorizationUrl(requestToken).returns('http://example.org/auth')
 
             expect:
 
                 simulate {
-                    oaService.getAuthorizationUrl(token) == 'http://example.org/auth'
+                    oaService.getAuthorizationUrl(requestToken) == 'http://example.org/auth'
                 }
+
+        }
+
+        def 'get the access token'() {
+
+            given:
+
+                Token expectedToken = new Token('d', 'e', 'f')
+                Verifier verifier = new Verifier('abcde')
+                oaService.service = mock(OAuthService)
+                oaService.service.getAccessToken(requestToken, verifier).returns(expectedToken)
+
+            when:
+
+                simulate {
+                    accessToken = oaService.getAccessToken(requestToken, verifier)
+                }
+
+           then:
+
+                accessToken.rawResponse == 'f'
+
+        }
+
+        @Unroll('make a #verb request using the authorised connection')
+        def 'make a request using the authorised connection'() {
+
+            given:
+
+                oaService.service = mock(OAuthService)
+
+            and:
+            
+                String expectedResponse = 'Hello There.'
+                Response oaResponse = mock(Response)
+                oaResponse.getBody().returns(expectedResponse)
+                oaResponse.getCode().returns(HttpStatus.OK.value())
+            
+            and:
+            
+                String url = 'http://example.org/list'
+                oaService.oaCommunicationService = mock(OACommunicationService)
+                oaService.oaCommunicationService.accessResource( match { true }, match { true } , match { true } , match { true } ).returns(oaResponse)
+
+            when:
+
+                String body = null
+                int code = -1
+
+            and:
+
+                simulate {
+
+                    oaService.getResource(accessToken, 'http://example.org/list')
+                    //body = actualResponse.getBody()
+                    //code = actualResponse.getCode()
+                }
+
+            then:
+
+                code == HttpStatus.OK.value()
+                body == expectedResponse
+
+            where:
+
+                verb << Verb.values()
+
 
         }
 

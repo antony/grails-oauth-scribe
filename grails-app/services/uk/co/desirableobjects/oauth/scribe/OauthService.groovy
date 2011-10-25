@@ -7,10 +7,16 @@ import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 import org.scribe.builder.ServiceBuilder
 import org.scribe.oauth.OAuthService
 import org.scribe.exceptions.OAuthException
+import org.scribe.model.Token
+import org.scribe.model.Verifier
+import org.scribe.model.Verb
+import org.scribe.model.Response
 
 class OauthService {
 
     protected OAuthService service
+
+    OACommunicationService oaCommunicationService
 
     OauthService() {
 
@@ -54,10 +60,46 @@ class OauthService {
         }
     }
 
-    public getRequestToken() {
+    Token getRequestToken() {
 
         return service.requestToken
 
+    }
+
+    String getAuthorizationUrl(Token token) {
+
+        return service.getAuthorizationUrl(token)
+
+    }
+
+    Token getAccessToken(Token token, Verifier verifier) {
+
+        return service.getAccessToken(token, verifier)
+
+    }
+
+    def methodMissing(String name, args) {
+
+           if( name ==~ /^.*Resource/) {
+
+              def m = name =~ /^(.*)Resource/
+              Verb verb = Verb.values().find { Verb verb -> verb.name() == (String) m[0][1] }
+              return accessResource(service, args[0] as Token, verb, args[1] as String)
+
+           } else {
+
+               throw new MissingMethodException(name, this.class, args)
+
+
+           }
+    }
+
+    private Response accessResource(OAuthService oaService, Token accessToken, Verb verb, String url) {
+
+        println "calling"
+
+        return oaCommunicationService.accessResource(service, accessToken, verb, url)
+        
     }
 
 }

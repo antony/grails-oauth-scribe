@@ -141,37 +141,6 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
-
-    def 'a request token can be fetched'() {
-
-        given:
-
-            mockConfig """
-                import org.scribe.builder.api.TwitterApi
-
-                oauth {
-                    provider = TwitterApi
-                    key = 'myKey'
-                    secret = 'mySecret'
-                }
-            """
-            OauthService service = new OauthService()
-
-            service.service = mock(OAuthService)
-            service.service.getRequestToken().returns(new Token('a', 'b', 'c'))
-
-        when:
-            Token token
-            simulate {
-                token = service.requestToken
-            }
-
-        then:
-            token.rawResponse == 'c'
-
-    }
-
-
     class InvalidProviderApi {
 
     }
