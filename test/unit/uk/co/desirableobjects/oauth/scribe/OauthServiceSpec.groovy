@@ -8,7 +8,10 @@ import org.scribe.model.OAuthConfig
 import org.scribe.builder.api.TwitterApi
 
 import spock.lang.Unroll
+import org.scribe.model.Token
+import org.gmock.WithGMock
 
+@Mixin(GMockAddon)
 class OauthServiceSpec extends UnitSpec {
 
     def 'Configuration is missing'() {
@@ -120,18 +123,54 @@ class OauthServiceSpec extends UnitSpec {
 
     def 'callback URL is supported but optional'() {
 
-        given:
+        when:
             mockConfig """
-                    import uk.co.desirableobjects.oauth.scribe.OauthServiceSpec.InvalidProviderApi
+                    import org.scribe.builder.api.TwitterApi
 
                     oauth {
-                        provider = InvalidProviderApi
+                        provider = TwitterApi
                         key = 'myKey'
                         secret = 'mySecret'
+                        callback = 'http://example.com:1234/url'
                     }
                 """
 
+        then:
+
+            new OauthService()
+
     }
+
+
+    def 'a request token can be fetched'() {
+
+        given:
+
+            mockConfig """
+                import org.scribe.builder.api.TwitterApi
+
+                oauth {
+                    provider = TwitterApi
+                    key = 'myKey'
+                    secret = 'mySecret'
+                }
+            """
+            OauthService service = new OauthService()
+
+            service.service = mock(OAuthService)
+            service.service.getRequestToken().returns(new Token('a', 'b', 'c'))
+
+        when:
+            Token token
+            simulate {
+                token = service.requestToken
+            }
+
+        then:
+            token.rawResponse == 'c'
+
+    }
+
 
     class InvalidProviderApi {
 
