@@ -80,24 +80,24 @@ class OauthService {
 
     def methodMissing(String name, args) {
 
-           if( name ==~ /^.*Resource/) {
+       if( name ==~ /^.*Resource/) {
 
               def m = name =~ /^(.*)Resource/
-              Verb verb = Verb.values().find { Verb verb -> verb.name() == (String) m[0][1] }
-              return accessResource(service, args[0] as Token, verb, args[1] as String)
+              String verb = (String) m[0][1]
 
-           } else {
+              if (Verb.values()*.name().find { it == verb.toUpperCase() } ) {
+                  return accessResource(args[0] as Token, verb, args[1] as String)
+              }
 
-               throw new MissingMethodException(name, this.class, args)
+       }
 
+       throw new MissingMethodException(name, this.class, args)
 
-           }
     }
 
-    private Response accessResource(OAuthService oaService, Token accessToken, Verb verb, String url) {
+    Response accessResource(Token accessToken, String verbName, String url) {
 
-        println "calling"
-
+        Verb verb = Verb.valueOf(verbName.toUpperCase())
         return oaCommunicationService.accessResource(service, accessToken, verb, url)
         
     }

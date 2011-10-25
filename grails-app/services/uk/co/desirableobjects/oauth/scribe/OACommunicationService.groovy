@@ -12,8 +12,6 @@ class OACommunicationService {
 
     Response accessResource(OAuthService service, Token accessToken, Verb verb, String url) {
 
-        println 'requested'
-
         OAuthRequest oAuthRequest = new OAuthRequest(verb, url)
         service.signRequest(accessToken, oAuthRequest)
         return oAuthRequest.send()

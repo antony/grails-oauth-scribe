@@ -98,8 +98,7 @@ class AuthorisationProcessSpec extends UnitSpec {
                 oaResponse.getCode().returns(HttpStatus.OK.value())
             
             and:
-            
-                String url = 'http://example.org/list'
+
                 oaService.oaCommunicationService = mock(OACommunicationService)
                 oaService.oaCommunicationService.accessResource( match { true }, match { true } , match { true } , match { true } ).returns(oaResponse)
 
@@ -112,9 +111,9 @@ class AuthorisationProcessSpec extends UnitSpec {
 
                 simulate {
 
-                    oaService.getResource(accessToken, 'http://example.org/list')
-                    //body = actualResponse.getBody()
-                    //code = actualResponse.getCode()
+                    def actualResponse = oaService."${verb.name().toLowerCase()}Resource"(accessToken, 'http://example.org/list')
+                    body = actualResponse.getBody()
+                    code = actualResponse.getCode()
                 }
 
             then:
@@ -126,6 +125,18 @@ class AuthorisationProcessSpec extends UnitSpec {
 
                 verb << Verb.values()
 
+
+        }
+
+        def 'try to call an invalid resource accessor method on the service' () {
+
+            when:
+
+                oaService.failResource(accessToken, 'anyUrl')
+
+            then:
+
+                thrown(MissingMethodException)
 
         }
 
