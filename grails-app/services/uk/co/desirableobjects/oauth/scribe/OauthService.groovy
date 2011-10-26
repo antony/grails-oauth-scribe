@@ -11,6 +11,7 @@ import org.scribe.model.Token
 import org.scribe.model.Verifier
 import org.scribe.model.Verb
 import org.scribe.model.Response
+import org.scribe.model.SignatureType
 
 class OauthService {
 
@@ -36,16 +37,23 @@ class OauthService {
 
     private OAuthService buildService() {
 
-        Class<? extends Api> provider = CH.config.oauth.provider
-        String callback = CH.config.oauth?.callback
+        ConfigObject oaConfig = CH.config.oauth
+
+        Class provider = oaConfig.provider
+        String callback = oaConfig.containsKey('callback') ? oaConfig.callback : null
+        SignatureType signatureType = CH.config.oauth.containsKey('signatureType') ? CH.config.oauth?.signatureType : null
 
         ServiceBuilder serviceBuilder = new ServiceBuilder()
         .provider(provider)
         .apiKey(CH.config?.oauth.key)
         .apiSecret(CH.config?.oauth.key)
 
-        if (CH.config.oauth?.callback) {
+        if (callback) {
             serviceBuilder.callback(callback)
+        }
+
+        if (signatureType) {
+            serviceBuilder.signatureType(signatureType)
         }
 
         service = serviceBuilder.build()

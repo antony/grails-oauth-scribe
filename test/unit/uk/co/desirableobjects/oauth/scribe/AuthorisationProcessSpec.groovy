@@ -20,6 +20,7 @@ class AuthorisationProcessSpec extends UnitSpec {
         @Shared Token accessToken
         @Shared OauthService oaService
 
+        // TODO: This scenario: oauth_problem=signature_invalid&oauth_problem_advice=Failed%20to%20validate%20signature
         def 'a request token can be fetched'() {
 
                 given:

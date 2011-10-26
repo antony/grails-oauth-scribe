@@ -121,17 +121,20 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
-    def 'callback URL is supported but optional'() {
+    // validate signature types
+    def 'callback URL and Signature Type is supported but optional'() {
 
         when:
             mockConfig """
                     import org.scribe.builder.api.TwitterApi
+                    import org.scribe.model.SignatureType
 
                     oauth {
                         provider = TwitterApi
                         key = 'myKey'
                         secret = 'mySecret'
                         callback = 'http://example.com:1234/url'
+                        signatureType = SignatureType.QueryString
                     }
                 """
 
