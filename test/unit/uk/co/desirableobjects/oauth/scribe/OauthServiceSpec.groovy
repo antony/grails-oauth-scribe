@@ -144,6 +144,34 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
+    def 'configuration contains a successUri and a failureUri'() {
+
+        given:
+
+            mockConfig '''
+                import org.scribe.builder.api.TwitterApi
+                import org.scribe.model.SignatureType
+
+                oauth {
+                    provider = TwitterApi
+                    key = 'myKey'
+                    secret = 'mySecret'
+                    successUri = '/coffee/tea'
+                    failureUri = '/cola/pepsi'
+                }
+            '''
+
+        when:
+
+            OauthService service = new OauthService()
+
+        then:
+
+            service.successUri == '/coffee/tea'
+            service.failureUri == '/cola/pepsi'
+
+    }
+
     class InvalidProviderApi {
 
     }

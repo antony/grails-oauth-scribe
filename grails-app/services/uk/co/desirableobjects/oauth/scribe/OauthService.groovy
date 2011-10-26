@@ -16,8 +16,12 @@ import org.scribe.model.SignatureType
 class OauthService {
 
     protected OAuthService service
-
     OACommunicationService oaCommunicationService
+
+    public static final String REQUEST_TOKEN_SESSION_KEY = 'oasRequestToken'
+
+    String successUri
+    String failureUri
 
     OauthService() {
 
@@ -26,6 +30,8 @@ class OauthService {
         try {
 
             service = buildService()
+            this.successUri = CH.config.oauth.successUri
+            this.failureUri = CH.config.oauth.failureUri
 
         } catch (GroovyCastException gce) {
             throw new InvalidOauthProviderException("${CH.config.oauth.provider} is not a Class" as String)
@@ -46,7 +52,7 @@ class OauthService {
         ServiceBuilder serviceBuilder = new ServiceBuilder()
         .provider(provider)
         .apiKey(CH.config?.oauth.key)
-        .apiSecret(CH.config?.oauth.key)
+        .apiSecret(CH.config?.oauth.secret)
 
         if (callback) {
             serviceBuilder.callback(callback)

@@ -11,15 +11,28 @@ class OauthControllerSpec extends ControllerSpec {
 
         given:
 
+            mockConfig '''
+
+                oauth {
+                    successUri = '/coffee/tea'
+                }
+
+            '''
+
+        and:
             Token requestToken = new Token('a', 'b', 'c')
+            mockSession['oasRequestToken'] = requestToken
+
+        and:
+
             Token accessToken = new Token('d', 'e', 'f')
             Verifier verifier = new Verifier('xyz')
 
         and:
 
             controller.oauthService = mock(OauthService)
-            controller.oauthService.getRequestToken().returns(requestToken)
             controller.oauthService.getAccessToken(requestToken, match { it.value == verifier.value }).returns(accessToken)
+            controller.oauthService.getSuccessUri().returns('/coffee/tea')
 
         and:
 
@@ -34,6 +47,7 @@ class OauthControllerSpec extends ControllerSpec {
         then:
 
             mockSession.oauthAccessToken == accessToken
+            redirectArgs.uri == '/coffee/tea'
 
     }
 
@@ -67,6 +81,8 @@ class OauthControllerSpec extends ControllerSpec {
 
         then:
 
+
+            mockSession['oasRequestToken'] == requestToken
             redirectArgs.url == 'http://authorisation.url/auth'
 
     }
