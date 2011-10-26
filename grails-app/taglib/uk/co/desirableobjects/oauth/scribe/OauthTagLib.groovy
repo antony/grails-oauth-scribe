@@ -6,7 +6,8 @@ class OauthTagLib {
 
     def connect = { attrs, body ->
 
-        out << g.link(url:[controller:'oauth', action:'authenticate'], body)
+        Map a = attrs+[url:[controller:'oauth', action:'authenticate']]
+        out << g.link(a, body)
 
     }
 
