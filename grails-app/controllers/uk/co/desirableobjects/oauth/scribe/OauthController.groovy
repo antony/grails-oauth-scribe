@@ -9,14 +9,31 @@ class OauthController {
 
     def callback = {
 
-        String verification = params.oauth_verifier
-        Verifier verifier = new Verifier(verification)
+        Verifier verifier = extractVerifier(params)
+
+        if (!verifier) {
+            return redirect(uri: oauthService.failureUri)
+        }
 
         Token requestToken = (Token) session[OauthService.REQUEST_TOKEN_SESSION_KEY]
         Token accessToken = oauthService.getAccessToken(requestToken, verifier)
 
-        session.oauthAccessToken = accessToken
-        redirect uri: oauthService.successUri
+        session[OauthService.ACCESS_TOKEN_SESSION_KEY] = accessToken
+        session.removeAttribute(OauthService.REQUEST_TOKEN_SESSION_KEY)
+
+        return redirect(uri: oauthService.successUri)
+
+    }
+
+    private extractVerifier(params) {
+
+        if (!params.oauth_verifier) {
+             log.error("Cannot authenticate with oauth: Could not find oauth verifier in ${params}")
+             return null
+        }
+
+        String verification = params.oauth_verifier
+        return new Verifier(verification)
 
     }
 

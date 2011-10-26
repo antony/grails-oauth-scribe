@@ -7,21 +7,11 @@ import org.scribe.model.Verifier
 @Mixin(GMockAddon)
 class OauthControllerSpec extends ControllerSpec {
 
-    def 'Token can be read from callback'() {
+    def 'Success URL is hit and token is read from callback'() {
 
         given:
-
-            mockConfig '''
-
-                oauth {
-                    successUri = '/coffee/tea'
-                }
-
-            '''
-
-        and:
             Token requestToken = new Token('a', 'b', 'c')
-            mockSession['oasRequestToken'] = requestToken
+            mockSession[OauthService.REQUEST_TOKEN_SESSION_KEY] = requestToken
 
         and:
 
@@ -46,28 +36,35 @@ class OauthControllerSpec extends ControllerSpec {
 
         then:
 
-            mockSession.oauthAccessToken == accessToken
+            !mockSession[OauthService.REQUEST_TOKEN_SESSION_KEY]
+            mockSession[OauthService.ACCESS_TOKEN_SESSION_KEY] == accessToken
             redirectArgs.uri == '/coffee/tea'
 
     }
 
-    def 'Auth endpoint is hit'() {
-
+    def 'callback provides no verifier'() {
 
         given:
 
-            mockConfig """
-                    import org.scribe.builder.api.TwitterApi
+            controller.oauthService = mock(OauthService)
+            controller.oauthService.getFailureUri().returns('/coke/pepsi')
 
-                    oauth {
-                        provider = TwitterApi
-                        key = 'myKey'
-                        secret = 'mySecret'
-                        callbackUrl = 'http://welcome.back/to/my/app'
-                    }
-            """
+        when:
 
-        and:
+            simulate {
+                controller.callback()
+            }
+
+        then:
+
+            redirectArgs.uri == '/coke/pepsi'
+
+    }
+
+    def 'Authentication endpoint is hit'() {
+
+        given:
+
             Token requestToken = new Token('a', 'b', 'c')
             controller.oauthService = mock(OauthService)
             controller.oauthService.requestToken.returns(requestToken)
@@ -81,8 +78,7 @@ class OauthControllerSpec extends ControllerSpec {
 
         then:
 
-
-            mockSession['oasRequestToken'] == requestToken
+            mockSession[OauthService.REQUEST_TOKEN_SESSION_KEY] == requestToken
             redirectArgs.url == 'http://authorisation.url/auth'
 
     }

@@ -19,6 +19,7 @@ class OauthService {
     OACommunicationService oaCommunicationService
 
     public static final String REQUEST_TOKEN_SESSION_KEY = 'oasRequestToken'
+    public static final String ACCESS_TOKEN_SESSION_KEY = 'oasAccessToken'
 
     String successUri
     String failureUri
