@@ -56,13 +56,16 @@ Minimal configuration, supports Oauth 1.0a and 2.0, and HMAC, RSA, and Plaintext
 Scribe oAuth</p>
 <h2>Install</h2>
 <p>Simply run:
+<pre>
 grails install-plugin oauth-scribe
 
 alternatively, the better way is to add (or add to) the following section inside your grails BuildConfig.groovy:
 
 plugins {
    runtime ':oauth-scribe:1.0' // Note, check for the latest version, don't just use 1.0
-}</p>
+}
+</pre>
+</p>
 <h2>License</h2>
 <p>GPL, ASL</p>
 <h2>Authors</h2>
@@ -70,6 +73,41 @@ plugins {
 <h2>Contact</h2>
 <p>Desirable Objects Ltd</p>
 
+<h2>Usage</h2>
+
+<p>
+After installing the plugin, add the following section to your Config.groovy file:
+
+<pre>
+oauth {
+    provider = org.scribe.builder.api.TwitterApi
+    key     = 'your-consumer-key'
+    secret  = 'your-consumer-secret'
+    callback = "${grails.serverURL}/oauth/callback"
+    successUri = '/myController/connected'
+    failureUri = '/myController/connection_failed'
+}
+</pre>
+
+In the configuration snippet above, all included configuration is mandatory, you can use the table below to help you tailor it to your needs.
+
+The table below describes the configuration parameters and their meanings:
+
+<dl>
+<dt>provider</dt><dd>The oAuth provider to be used. The org.scribe.builder.api package
+contains a lot of common ones, but if you need a custom provider, you can write your own
+as detailed in the scribe-java documentation</dd>
+<dt>key</dt><dd>Your consumer key as provided by your oauth provider</dd>
+<dt>secret</dt><dd>Your consumer secret as provided by your oauth provider</dd>
+<dt>callback</dt><dd>The internal callback your oauth provider should hit when you authorise. For now this should not be modified</dd>
+<dt>successUri</dt><dd>The url the user should end up at if they connect successfully with oauth</dd>
+<dt>failureUri</dt><dd>The url the user should end up at if their oauth connection fails for some reason</dd>
+<dt>connectTimeout</dt><dd>Optional. Number of milliseconds the plugin should wait to connect to the oauth provider before it gives up on the assumption that the provider is not responding. Defaults to 30000 (thirty seconds)</dd>
+<dt>connectTimeout</dt><dd>Optional. Number of milliseconds the plugin should wait to read data from the oauth provider before it gives up on the assumption that the provider is not responding. Defaults to 30000 (thirty seconds)</dd>
+
+</dl>
+
+</p>
 
     <h2>Download</h2>
     <p>
