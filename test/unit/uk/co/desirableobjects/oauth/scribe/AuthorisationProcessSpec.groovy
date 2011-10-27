@@ -114,8 +114,9 @@ class AuthorisationProcessSpec extends UnitSpec {
                 simulate {
 
                     def actualResponse = oaService."${verb.name().toLowerCase()}Resource"(accessToken, DUMMY_OAUTH_RESOURCE_URI)
-                    body = actualResponse.getBody()
-                    code = actualResponse.getCode()
+                    body = actualResponse.body
+                    code = actualResponse.code
+
                 }
 
             then:
