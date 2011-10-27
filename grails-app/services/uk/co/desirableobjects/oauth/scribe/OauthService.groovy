@@ -129,7 +129,7 @@ class OauthService {
     Response accessResource(Token accessToken, String verbName, String url) {
 
         Verb verb = Verb.valueOf(verbName.toUpperCase())
-        return oauthResourceService.accessResource(service, accessToken, verb, url)
+        return oauthResourceService.accessResource(service, accessToken, verb, url, connectTimeout, receiveTimeout)
         
     }
 

@@ -16,7 +16,8 @@ import spock.lang.Unroll
 @Mixin(GMockAddon)
 class AuthorisationProcessSpec extends UnitSpec {
 
-        @Shared Token requestToken
+    private static final String DUMMY_OAUTH_RESOURCE_URI = 'http://example.org/list'
+    @Shared Token requestToken
         @Shared Token accessToken
         @Shared OauthService oaService
 
@@ -101,7 +102,7 @@ class AuthorisationProcessSpec extends UnitSpec {
             and:
 
                 oaService.oauthResourceService = mock(OauthResourceService)
-                oaService.oauthResourceService.accessResource( match { true }, match { true } , match { true } , match { true } ).returns(oaResponse)
+                oaService.oauthResourceService.accessResource(oaService.service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, 30000, 30000).returns(oaResponse)
 
             when:
 
@@ -112,7 +113,7 @@ class AuthorisationProcessSpec extends UnitSpec {
 
                 simulate {
 
-                    def actualResponse = oaService."${verb.name().toLowerCase()}Resource"(accessToken, 'http://example.org/list')
+                    def actualResponse = oaService."${verb.name().toLowerCase()}Resource"(accessToken, DUMMY_OAUTH_RESOURCE_URI)
                     body = actualResponse.getBody()
                     code = actualResponse.getCode()
                 }

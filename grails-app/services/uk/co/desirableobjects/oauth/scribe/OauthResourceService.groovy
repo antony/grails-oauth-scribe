@@ -5,14 +5,17 @@ import org.scribe.model.Verb
 import org.scribe.model.OAuthRequest
 import org.scribe.oauth.OAuthService
 import org.scribe.model.Response
+import java.util.concurrent.TimeUnit
 
 class OauthResourceService {
 
     static transactional = true
 
-    Response accessResource(OAuthService service, Token accessToken, Verb verb, String url) {
+    Response accessResource(OAuthService service, Token accessToken, Verb verb, String url, int connectTimeout, int receiveTimeout) {
 
         OAuthRequest oAuthRequest = new OAuthRequest(verb, url)
+        oAuthRequest.setConnectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
+        oAuthRequest.setReadTimeout(receiveTimeout, TimeUnit.MILLISECONDS)
         service.signRequest(accessToken, oAuthRequest)
         return oAuthRequest.send()
 
