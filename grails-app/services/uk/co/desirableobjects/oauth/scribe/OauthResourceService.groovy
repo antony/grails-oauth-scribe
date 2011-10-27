@@ -6,7 +6,7 @@ import org.scribe.model.OAuthRequest
 import org.scribe.oauth.OAuthService
 import org.scribe.model.Response
 
-class OACommunicationService {
+class OauthResourceService {
 
     static transactional = true
 

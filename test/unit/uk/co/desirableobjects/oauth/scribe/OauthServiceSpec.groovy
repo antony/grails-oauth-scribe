@@ -172,6 +172,66 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
+    def 'configuration can set socket and receive timeouts'() {
+
+        given:
+
+            mockConfig '''
+                import org.scribe.builder.api.TwitterApi
+                import org.scribe.model.SignatureType
+
+                oauth {
+                    provider = TwitterApi
+                    key = 'myKey'
+                    secret = 'mySecret'
+                    successUri = '/coffee/tea'
+                    failureUri = '/cola/pepsi'
+                    connectTimeout = 5000
+                    receiveTimeout = 5000
+                }
+            '''
+
+        when:
+
+            OauthService service = new OauthService()
+
+        then:
+
+            service.connectTimeout == 5000
+            service.receiveTimeout == 5000
+
+    }
+
+
+    def 'if connection and recieve timeouts are not set, they are defaulted to thirty seconds'() {
+
+        given:
+
+            mockConfig '''
+                import org.scribe.builder.api.TwitterApi
+                import org.scribe.model.SignatureType
+
+                oauth {
+                    provider = TwitterApi
+                    key = 'myKey'
+                    secret = 'mySecret'
+                    successUri = '/coffee/tea'
+                    failureUri = '/cola/pepsi'
+                }
+            '''
+
+        when:
+
+            OauthService service = new OauthService()
+
+        then:
+
+            service.connectTimeout == 30000
+            service.receiveTimeout == 30000
+
+    }
+
+
     class InvalidProviderApi {
 
     }

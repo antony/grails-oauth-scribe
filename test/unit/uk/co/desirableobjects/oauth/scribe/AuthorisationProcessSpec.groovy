@@ -100,8 +100,8 @@ class AuthorisationProcessSpec extends UnitSpec {
             
             and:
 
-                oaService.oaCommunicationService = mock(OACommunicationService)
-                oaService.oaCommunicationService.accessResource( match { true }, match { true } , match { true } , match { true } ).returns(oaResponse)
+                oaService.oauthResourceService = mock(OauthResourceService)
+                oaService.oauthResourceService.accessResource( match { true }, match { true } , match { true } , match { true } ).returns(oaResponse)
 
             when:
 
