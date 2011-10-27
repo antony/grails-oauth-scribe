@@ -120,6 +120,25 @@ Once configured, usage is very straightforward. When you want a user to connect 
 
 The text 'Your link goes here' can be replaced with any content you like, including images, buttons, text - it will simply become wrapped in a link tag.
 
+If a user clicks your link, upon authorising with the oauth provider, they will be sent back to the 'successUri' configured in your configuration (above), and there will be a session variable called 'oauthToken' which contains an org.scribe.model.Token instance, which is your access token and can be used to make requests as follows:
+
+<pre>
+
+OauthService oauthService
+
+oauthService.getResource(session.oauthToken, 'http://api.yourprovider.com/users/list')
+
+</pre>
+
+In the instance above, yourprovider is your oauth protected resource. You can also use the following methods which represent GET, POST, PUT, and DELETE respectively:
+
+<ul>
+<li>getResource</li>
+<li>postResource</li>
+<li>putResource</li>
+<li>deleteResource</li>
+</ul>
+
 </p>
 
     <h2>Download</h2>
