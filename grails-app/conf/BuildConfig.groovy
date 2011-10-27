@@ -20,12 +20,16 @@ grails.project.dependency.resolution = {
     dependencies {
 
         runtime 'org.scribe:scribe:1.2.3'
-
         test    'org.gmock:gmock:0.8.1'
+
     }
     plugins {
 
         test(':spock:0.5-groovy-1.7') {
+            export = false
+        }
+
+        build(':release:1.0.0.RC3') {
             export = false
         }
 
