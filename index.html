@@ -8,7 +8,7 @@
   <style type="text/css">
     body {
       margin-top: 1.0em;
-      background-color: #bde5c1;
+      background-color: #fff;
       font-family: Helvetica, Arial, FreeSans, san-serif;
       color: #000000;
     }
@@ -55,12 +55,12 @@ Minimal configuration, supports Oauth 1.0a and 2.0, and HMAC, RSA, and Plaintext
 <p>Grails
 Scribe oAuth</p>
 <h2>Install</h2>
-<p>Simply run:
+<p>In the simplest instance:
 <pre>
 grails install-plugin oauth-scribe
-
-alternatively, the better way is to add (or add to) the following section inside your grails BuildConfig.groovy:
-
+</pre>
+alternatively, the correct way is to add (or add to) the following section inside your grails BuildConfig.groovy:
+<pre>
 plugins {
    runtime ':oauth-scribe:1.0' // Note, check for the latest version, don't just use 1.0
 }
@@ -106,6 +106,19 @@ as detailed in the scribe-java documentation</dd>
 <dt>connectTimeout</dt><dd>Optional. Number of milliseconds the plugin should wait to read data from the oauth provider before it gives up on the assumption that the provider is not responding. Defaults to 30000 (thirty seconds)</dd>
 
 </dl>
+
+</p>
+
+<h2>Usage</h2>
+
+<p>
+Once configured, usage is very straightforward. When you want a user to connect to your oauth provider, adding a link to do so is as simple as:
+
+<pre>
+&lt;oauth:link&gt;Your link goes here&lt;/oauth:link&gt;
+</pre>
+
+The text 'Your link goes here' can be replaced with any content you like, including images, buttons, text - it will simply become wrapped in a link tag.
 
 </p>
 
