@@ -1,3 +1,5 @@
+*.tld
+.idea
 .classpath
 .project
 settings.xml
