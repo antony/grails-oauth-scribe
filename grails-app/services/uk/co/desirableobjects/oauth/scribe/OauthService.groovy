@@ -59,6 +59,7 @@ class OauthService {
         Class provider = conf.provider
         String callback = conf.containsKey('callback') ? conf.callback : null
         SignatureType signatureType = conf.containsKey('signatureType') ? conf.signatureType : null
+        boolean debug = (conf.debug == true) ?: false
 
         ServiceBuilder serviceBuilder = new ServiceBuilder()
         .provider(provider)
@@ -71,6 +72,10 @@ class OauthService {
 
         if (signatureType) {
             serviceBuilder.signatureType(signatureType)
+        }
+
+        if (debug) {
+            serviceBuilder.debug()
         }
 
         service = serviceBuilder.build()

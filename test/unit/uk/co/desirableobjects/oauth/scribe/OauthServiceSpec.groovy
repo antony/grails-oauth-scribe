@@ -10,6 +10,7 @@ import org.scribe.builder.api.TwitterApi
 import spock.lang.Unroll
 import org.scribe.model.Token
 import org.gmock.WithGMock
+import org.scribe.builder.ServiceBuilder
 
 @Mixin(GMockAddon)
 class OauthServiceSpec extends UnitSpec {
@@ -44,6 +45,40 @@ class OauthServiceSpec extends UnitSpec {
         where:
             provider << [TwitterApi, CustomProviderApi]
 
+    }
+
+    @Unroll({"Configuration enables debug support when debug = ${debug}"})
+    def 'Configuration enables debugging support'() {
+
+        given:
+
+            boolean debugEnabled = false
+            ServiceBuilder.metaClass.debug = { debugEnabled = true }
+
+            mockConfig """
+                import org.scribe.builder.api.TwitterApi
+
+                oauth {
+                    provider = TwitterApi
+                    key = 'myKey'
+                    secret = 'mySecret'
+                    debug = ${debug}
+                }
+            """
+
+        and:
+            OauthService oauthService = new OauthService()
+
+        expect:
+            debugEnabled == debug
+
+        where:
+            debug << [false, true]
+
+    }
+
+    void cleanup() {
+        ServiceBuilder.metaClass = null
     }
 
     def 'Configuration contains a non-class as a provider'() {
