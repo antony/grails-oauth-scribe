@@ -62,7 +62,7 @@ grails install-plugin oauth-scribe
 alternatively, the correct way is to add (or add to) the following section inside your grails BuildConfig.groovy:
 <pre>
 plugins {
-   runtime ':oauth-scribe:1.0' // Note, check for the latest version, don't just use 1.0
+   runtime ':oauth-scribe:1.2' // Note, check for the latest version, don't just use 1.2
 }
 </pre>
 </p>
@@ -138,6 +138,18 @@ In the instance above, yourprovider is your oauth protected resource. You can al
 <li>putResource</li>
 <li>deleteResource</li>
 </ul>
+
+</p>
+
+<h2>Troubleshooting</h2>
+<p>
+Thanks to Oauth Scribe's debugging feature, you can get debugging information about your requests straight to System.out:
+
+Place the following in your Config.groovy file, in the oauth { } configuration closure:
+
+<pre>
+debug = true
+</pre>
 
 </p>
 
