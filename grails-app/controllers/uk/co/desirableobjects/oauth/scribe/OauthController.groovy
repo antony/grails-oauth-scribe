@@ -5,6 +5,8 @@ import org.scribe.model.Token
 
 class OauthController {
 
+    private final Token EMPTY_TOKEN = null
+
     OauthService oauthService
 
     def callback = {
@@ -26,24 +28,32 @@ class OauthController {
     }
 
     private extractVerifier(params) {
+        
+        String verifierKey = 'oauth_verifier'
+        if (oauthService.oauthVersion==SupportedOauthVersion.TWO) {
+            verifierKey = 'code'
+        }
 
-        if (!params.oauth_verifier) {
+        if (!params[verifierKey]) {
              log.error("Cannot authenticate with oauth: Could not find oauth verifier in ${params}")
              return null
         }
 
-        String verification = params.oauth_verifier
+        String verification = params[verifierKey]
         return new Verifier(verification)
 
     }
 
-    // TODO: I don't like how this uses the session
     def authenticate = {
 
-        Token requestToken = oauthService.requestToken
+        Token requestToken = EMPTY_TOKEN
+        if (oauthService.getOauthVersion() == SupportedOauthVersion.ONE) {
+            requestToken = oauthService.requestToken
+        }
+
         session[OauthService.REQUEST_TOKEN_SESSION_KEY] = requestToken
         String url = oauthService.getAuthorizationUrl(requestToken)
-
+        
         return redirect(url: url)
     }
 

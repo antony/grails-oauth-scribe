@@ -85,7 +85,7 @@ class AuthorisationProcessSpec extends UnitSpec {
 
         }
 
-        @Unroll('make a #verb request using the authorised connection')
+        @Unroll({'make a $verb request using the authorised connection'})
         def 'make a request using the authorised connection'() {
 
             given:

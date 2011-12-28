@@ -133,4 +133,8 @@ class OauthService {
         
     }
 
+    SupportedOauthVersion getOauthVersion() {
+        return SupportedOauthVersion.parse(service.version)
+    }
+
 }

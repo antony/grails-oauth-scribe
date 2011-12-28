@@ -21,6 +21,7 @@ class OauthControllerSpec extends ControllerSpec {
         and:
 
             controller.oauthService = mock(OauthService)
+            controller.oauthService.getOauthVersion().returns(SupportedOauthVersion.ONE)
             controller.oauthService.getAccessToken(requestToken, match { it.value == verifier.value }).returns(accessToken)
             controller.oauthService.getSuccessUri().returns('/coffee/tea')
 
@@ -47,6 +48,7 @@ class OauthControllerSpec extends ControllerSpec {
         given:
 
             controller.oauthService = mock(OauthService)
+            controller.oauthService.getOauthVersion().returns(SupportedOauthVersion.ONE)
             controller.oauthService.getFailureUri().returns('/coke/pepsi')
 
         when:
@@ -67,6 +69,7 @@ class OauthControllerSpec extends ControllerSpec {
 
             Token requestToken = new Token('a', 'b', 'c')
             controller.oauthService = mock(OauthService)
+            controller.oauthService.getOauthVersion().returns(SupportedOauthVersion.ONE)
             controller.oauthService.requestToken.returns(requestToken)
             controller.oauthService.getAuthorizationUrl(requestToken).returns('http://authorisation.url/auth')
 
@@ -82,5 +85,28 @@ class OauthControllerSpec extends ControllerSpec {
             redirectArgs.url == 'http://authorisation.url/auth'
 
     }
+
+    def 'In Oauth 2, request token endpoint is not hit'() {
+
+        given:
+
+            controller.oauthService = mock(OauthService)
+            controller.oauthService.getOauthVersion().returns(SupportedOauthVersion.TWO)
+            controller.oauthService.getAuthorizationUrl(null).returns('http://authorisation.url/auth')
+
+        when:
+
+            simulate {
+                controller.authenticate()
+            }
+
+        then:
+
+            mockSession[OauthService.REQUEST_TOKEN_SESSION_KEY] == null
+            redirectArgs.url == 'http://authorisation.url/auth'
+
+    }
+
+    // TODO:  {"error":{"message":"Error validating client secret.","type":"OAuthException"}}
 
 }

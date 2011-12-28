@@ -2,6 +2,8 @@ grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 
+grails.release.scm.enabled = false
+
 grails.project.dependency.resolution = {
 
     inherits("global") {
@@ -14,22 +16,21 @@ grails.project.dependency.resolution = {
         grailsHome()
         grailsCentral()
 
-        mavenLocal()
+        mavenLocal(null)
         mavenCentral()
+        mavenRepo 'http://repo.desirableobjects.co.uk'
     }
     dependencies {
 
-        runtime 'org.scribe:scribe:1.2.3'
-        test    'org.gmock:gmock:0.8.1'
+        runtime 'org.scribe:scribe:1.3.0'
+        test    'org.gmock:gmock:0.8.2'
 
     }
     plugins {
 
-        test(':spock:0.5-groovy-1.7') {
-            export = false
-        }
+        test ':spock:0.6-SNAPSHOT'
 
-        build(':release:1.0.0.RC3') {
+        build ':release:1.0.0', {
             export = false
         }
 

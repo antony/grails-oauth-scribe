@@ -24,7 +24,7 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
-    @Unroll('Configuration contains #provider provider')
+    @Unroll({"Configuration contains ${provider} provider"})
     def 'Configuration contains valid provider'() {
 
         given:
@@ -88,7 +88,7 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
-    @Unroll("Configuration is provided with invalid key (#key) or secret (#secret)")
+    @Unroll({"Configuration is provided with invalid key (${key}) or secret (${secret})"})
     def 'Configuration is missing keys and or secrets'() {
 
 
@@ -231,6 +231,38 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
+    @Unroll({"Service returns correct API version when given ${apiClass}"})
+    def 'Service returns correct API version'() {
+
+        given:
+
+            mockConfig """
+                import org.scribe.model.SignatureType
+
+                oauth {
+                    provider = ${apiClass}
+                    key = 'myKey'
+                    secret = 'mySecret'
+                    callback = 'http://localhost:8080/hi'
+                    successUri = '/coffee/tea'
+                    failureUri = '/cola/pepsi'
+                }
+            """
+
+        when:
+
+            OauthService service = new OauthService()
+
+        then:
+
+            service.oauthVersion == apiVersion
+
+        where:
+            apiClass                                                               | apiVersion
+            'uk.co.desirableobjects.oauth.scribe.test.Test10aApiImplementation'    | SupportedOauthVersion.ONE
+            'org.scribe.builder.api.FacebookApi'                                   | SupportedOauthVersion.TWO
+
+    }
 
     class InvalidProviderApi {
 
