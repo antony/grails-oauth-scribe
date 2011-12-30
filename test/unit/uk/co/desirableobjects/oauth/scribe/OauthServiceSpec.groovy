@@ -67,7 +67,7 @@ class OauthServiceSpec extends UnitSpec {
             """
 
         and:
-            OauthService oauthService = new OauthService()
+            new OauthService()
 
         expect:
             debugEnabled == debug
@@ -76,6 +76,37 @@ class OauthServiceSpec extends UnitSpec {
             debug << [false, true]
 
     }
+
+    @Unroll({"Configuration includes or excludes a scope when scope is = ${scope}"})
+    def 'Configuration includes scope'() {
+
+        given:
+
+            String providedScope = null
+            ServiceBuilder.metaClass.scope = { String passedScope -> providedScope = passedScope }
+
+            mockConfig """
+                import org.scribe.builder.api.TwitterApi
+
+                oauth {
+                    provider = TwitterApi
+                    key = 'myKey'
+                    secret = 'mySecret'
+                    ${scope ? "scope = 'testScope'" : ""}
+                }
+            """
+
+        and:
+            new OauthService()
+
+        expect:
+            providedScope == (scope ? 'testScope' : null)
+
+        where:
+            scope << [true, false]
+
+    }
+
 
     void cleanup() {
         ServiceBuilder.metaClass = null
