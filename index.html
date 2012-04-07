@@ -120,17 +120,23 @@ Once configured, usage is very straightforward. When you want a user to connect 
 
 The text 'Your link goes here' can be replaced with any content you like, including images, buttons, text - it will simply become wrapped in a link tag.
 
-If a user clicks your link, upon authorising with the oauth provider, they will be sent back to the 'successUri' configured in your configuration (above), and there will be a session variable called 'oauthToken' which contains an org.scribe.model.Token instance, which is your access token and can be used to make requests as follows:
+If a user clicks your link, they will be sent back to the 'successUri' configured in your configuration (above) after authorising with the oauth provider. At this point there will be a session variable called 'oasAccessToken' which contains an <tt>org.scribe.model.Token</tt> instance, which is your access token and can be used to make requests as follows:
 
 <pre>
+import uk.co.desirableobjects.oauth.scribe.OauthService
 
-OauthService oauthService
+class MyService {
+    OauthService oauthService
 
-oauthService.getResource(session.oauthToken, 'http://api.yourprovider.com/users/list')
-
+    def myMethod() {
+        oauthService.getResource(session[OauthService.ACCESS_TOKEN_SESSION_KEY], 'http://api.yourprovider.com/users/list')
+    }
+}
 </pre>
 
-In the instance above, yourprovider is your oauth protected resource. You can also use the following methods which represent GET, POST, PUT, and DELETE respectively:
+<p>Although you can use the 'oasAccessToken' string literal, it's better to use the constant field <tt>OauthService.ACCESS_TOKEN_SESSION_KEY</tt> in case the actual key changes at any point.</p>
+
+<p>In the instance above, <tt>yourprovider</tt> is your oauth protected resource. You can also use the following methods which represent GET, POST, PUT, and DELETE respectively:</p>
 
 <ul>
 <li>getResource</li>
