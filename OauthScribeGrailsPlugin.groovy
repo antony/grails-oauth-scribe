@@ -15,6 +15,6 @@ class OauthScribeGrailsPlugin {
     def title = "Oauth Scribe Plugin"
     def description = 'Provides oAuth integration for Grails, using the Scribe framework'
 
-    def documentation = "http://grails.org/plugin/grails-oauth-scribe"
-
+    def documentation = "http://aiten.github.com/grails-oauth-scribe/"
+    def scm = [url: "https://github.com/aiten/grails-oauth-scribe"]
 }
