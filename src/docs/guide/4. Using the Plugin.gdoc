@@ -1,6 +1,6 @@
 Using the oauth plugin in your application requires a few simple steps.
 
-1. Using the Tag Library
+h1. Using the Tag Library
 
 To render a user-clickable link in your application which will direct them to a provider's authentication page, use the @connect@ tag:
 
@@ -16,7 +16,7 @@ This tag will work automatically on its own can also accept any standard paramet
 <oauth:connect provider="facebook" id="facebook-connect-link">Connect to Facebook</oauth:connect>
 {code}
 
-2. Receiving the oauth AccessToken
+h1. Receiving the oauth AccessToken
 
 After a user clicks your link, they will be sent back to the successUrl you specified in your configuration (or failureUrl if something went wrong). At this point there will be a session variable called 'providerName:oasAccessToken' (where providerName is one of your configured provider names) which contains an <tt>org.scribe.model.Token</tt> instance, which is your Access Token.
 
@@ -37,7 +37,7 @@ class MyClass {
 
 would give you the access token for the 'twitter' provider which you can then use to make requests, as below.
 
-3. Requesting a resource using your AccessToken
+h1. Requesting a resource using your AccessToken
 
 Provided your access token is now present, you now can request oauth protected resources from your third-party provider!
 
@@ -61,9 +61,12 @@ The convention used for accessing resources is @OauthService.<method><provider>R
 
 In the above example:
 
-*method* is the HTTP method used, one of put, post, get, delete, head, or options.
-*url* is the url of the oauth-protected resource you are trying to access.
-*provider* is the provider name configured in your oauth configuration.
-*accessToken* is the access token you were given (via the session) when the user authenticated themselves with the provider.
+{table}
+*component* | *description*
+*method* | is the HTTP method used, one of put, post, get, delete, head, or options.
+*url* | is the url of the oauth-protected resource you are trying to access.
+*provider* | is the provider name configured in your oauth configuration.
+*accessToken* | is the access token you were given (via the session) when the user authenticated themselves with the provider.
+{table}
 
 

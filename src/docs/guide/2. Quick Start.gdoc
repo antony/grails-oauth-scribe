@@ -1,0 +1,75 @@
+h1. Install the plugin
+
+Installing the plugin can be done in one of two ways:
+
+h2. Installing the plugin using the Grails dependency DSL (Recommended)
+
+In @BuildConfig.groovy@, add the dependency to your 'plugins' section:
+{code}
+    plugins {
+        ...
+        compile ':oauth:1.0'
+        ...
+    }
+{code}
+
+{note}
+Note that the version (1.0 in the example above) should be change to refelect the version you would like to use.
+{note}
+
+h2. Installing the plugin 'on-the-fly':
+
+Simply run the command @grails install-plugin oauth@. Note that this will install the latest version into the global scope, rather than the compile scope which is slightly cleaner, above.
+
+h1. Configure the plugin
+
+Before the plugin can work, it requires at least one provider to be configured. The following is the minimal configuration you can get away with:
+
+In @Config.groovy@
+{code}
+    oauth {
+        providers {
+            twitter {
+                api = TwitterApi
+                key = 'my-key'
+                secret = 'my-secret'
+            }
+        }
+    }
+{code}
+
+In this example, @twitter@ is the provider name you will use within your application. @api@ is the scribe provider class which relates to the oauth service you are trying to connect to, and is a subclass of @OauthService@. It can be anything you want. @key@ is the oauth-key you have been given by your provider and @secret@ is the oauth-secret you have been given by your provider. You will need to import this into your @Config.groovy@ file using the standard java @import@ keyword.
+
+{note}
+Note that provider names are all lowercase - you don't necessarily need to lowercase them in your configuration, but when referencing them within the application, they have been lowercased for you. This means that 'MyProvider' becomes 'myprovider'.
+{note}
+
+h2. Adding success and failure URIs
+
+When connecting to providers, the @successUri@ and @failureUri@ are the endpoints which the user will get redirected back to if connection to the provider succeeds, or fails, respectively.
+
+{code}
+    oauth {
+        providers {
+            twitter {
+                api = TwitterApi
+                key = 'my-key'
+                secret = 'my-secret'
+                successUri = '/your/success/page'
+                failureUri = '/your/failure/page'
+            }
+        }
+    }
+{code}
+
+At this stage, you can safely use the plugin with no further work!
+
+h1. Providers which work 'out-of-the-box'
+
+Scribe supports a large providers out of the box, using one of these services is as easy as specifying the provider's class as your @api@ directive in the configuration above.
+
+For a full list of providers, see [OAuth Scribe's api package|https://github.com/fernandezpablo85/scribe-java/tree/master/src/main/java/org/scribe/builder/api]
+
+h2. Implementing your own provider
+
+To implement your own provider, simply subclass either @DefaultApi10a@ or @DefaultApi20@ depending on the implementation of oauth your provider supports, and provide your implementation class to the configuration's @api@ parameter.

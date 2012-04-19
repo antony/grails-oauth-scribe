@@ -1,0 +1,26 @@
+The Grails Oauth plugin enables you to consume services from third-party providers which are protected by oauth based security, in your own applications.
+
+h1. About the plugin
+
+* Author:
+
+** Antony Jones, Desirable Objects Ltd
+
+* Contributors:
+
+** Anthony Campbell
+** Peter Ledbrook, VMWare Inc
+** Richard Spence
+
+* Thanks:
+
+** Pablo Fernandez, Globant
+** Damien Hou, Google Inc
+
+h1. Further Reading
+
+This plugin makes heavy use of the [OAuth Scribe|https://github.com/fernandezpablo85/scribe-java] library, by Pablo Fernandez. Please refer to scribe's documentation for detailed information on creating your own custom provider implementation.
+
+h1. Licensing
+
+This plugin is released under the GPLv2, however should this not suit your needs, please get in touch.

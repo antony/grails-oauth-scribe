@@ -14,9 +14,9 @@ Provided that you have read the Quick Start guide, you should have some configur
 
 You're now in a good position to configure some further elements of the plugin if you need to.
 
-1. Provider specific configuration
+h1. Provider specific configuration
 
-a. Adding a second provider
+h2. Adding a second provider
 
 Adding a second provider is as easy as adding your provider-specific configuration to the providers block:
 
@@ -37,25 +37,7 @@ Adding a second provider is as easy as adding your provider-specific configurati
     }
 {code}
 
-b. Adding success and failure URIs
-
-When connecting to providers, the @successUri@ and @failureUri@ are the endpoints which the user will get redirected back to if connection to the provider succeeds, or fails, respectively.
-
-{code}
-    oauth {
-        providers {
-            twitter {
-                api = TwitterApi
-                key = 'my-key'
-                secret = 'my-secret'
-                successUri = '/your/success/page'
-                failureUri = '/your/failure/page'
-            }
-        }
-    }
-{code}
-
-c. Adding a callback URI
+h2. Adding a callback URI
 
 A callback uri can be specified at the provider level:
 
@@ -72,7 +54,7 @@ A callback uri can be specified at the provider level:
   }
 {code}
 
-d. Adding a SignatureType
+h2. Adding a SignatureType
 
 An Oauth2 SignatureType can be specified at the provider level, if your provider requires a specific method.
 
@@ -91,7 +73,7 @@ Valid @SignatureType@s are @SignatureType.QueryString@ or @SignatureType.Header@
   }
 {code}
 
-e. Oauth provider scope
+h2. Oauth provider scope
 
 Some providers (such as google) require a scope to be set for an oauth connection. The scope directive shown below will enable you to set this as necessary.
 
@@ -108,9 +90,9 @@ Some providers (such as google) require a scope to be set for an oauth connectio
   }
 {code}
 
-2. Global configuration
+h1. Global configuration
 
-a. Turning request debugging on
+h2. Turning request debugging on
 
 As of Scribe 1.2.3, debugging of HTTP traffic can be enabled to make troubleshooting issues easier. To enable this feature, add 'debug = true' in your global configuration:
 
@@ -127,7 +109,7 @@ As of Scribe 1.2.3, debugging of HTTP traffic can be enabled to make troubleshoo
   }
 {code}
 
-b. Adding connect and receive timeouts
+h2. Adding connect and receive timeouts
 
 Sometimes you want to account for slower providers, or just fail more quickly if a provider isn't responding the way you would like it to. Connect and Receive timeouts can be configured for this purpose.
 

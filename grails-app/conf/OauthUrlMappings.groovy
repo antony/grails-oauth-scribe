@@ -1,4 +1,4 @@
-class UrlMappings {
+class OauthUrlMappings {
 
     static mappings = {
 
