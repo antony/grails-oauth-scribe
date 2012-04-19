@@ -11,6 +11,7 @@ import org.scribe.model.Verb
 import org.scribe.model.Response
 import org.springframework.http.HttpStatus
 import spock.lang.Unroll
+import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
 
 @Stepwise
 @Mixin(GMockAddon)
@@ -30,19 +31,23 @@ class AuthorisationProcessSpec extends UnitSpec {
                         import org.scribe.builder.api.TwitterApi
 
                         oauth {
-                            provider = TwitterApi
-                            key = 'myKey'
-                            secret = 'mySecret'
+                            providers {
+                                twitter {
+                                    api = TwitterApi
+                                    key = 'myKey'
+                                    secret = 'mySecret'
+                                }
+                            }
                         }
                     """
                     oaService = new OauthService()
 
-                    oaService.service = mock(OAuthService)
-                    oaService.service.getRequestToken().returns(new Token('a', 'b', 'c'))
+                    oaService.services.twitter.service = mock(OAuthService)
+                    oaService.services.twitter.service.getRequestToken().returns(new Token('a', 'b', 'c'))
 
                 when:
                     simulate {
-                        requestToken = oaService.requestToken
+                        requestToken = oaService.getTwitterRequestToken()
                     }
 
                 then:
@@ -54,12 +59,12 @@ class AuthorisationProcessSpec extends UnitSpec {
 
             given:
 
-                oaService.service.getAuthorizationUrl(requestToken).returns('http://example.org/auth')
+                oaService.services.twitter.service.getAuthorizationUrl(requestToken).returns('http://example.org/auth')
 
             expect:
 
                 simulate {
-                    oaService.getAuthorizationUrl(requestToken) == 'http://example.org/auth'
+                    oaService.getTwitterAuthorizationUrl(requestToken) == 'http://example.org/auth'
                 }
 
         }
@@ -70,13 +75,13 @@ class AuthorisationProcessSpec extends UnitSpec {
 
                 Token expectedToken = new Token('d', 'e', 'f')
                 Verifier verifier = new Verifier('abcde')
-                oaService.service = mock(OAuthService)
-                oaService.service.getAccessToken(requestToken, verifier).returns(expectedToken)
+                oaService.services.twitter.service = mock(OAuthService)
+                oaService.services.twitter.service.getAccessToken(requestToken, verifier).returns(expectedToken)
 
             when:
 
                 simulate {
-                    accessToken = oaService.getAccessToken(requestToken, verifier)
+                    accessToken = oaService.getTwitterAccessToken(requestToken, verifier)
                 }
 
            then:
@@ -85,12 +90,12 @@ class AuthorisationProcessSpec extends UnitSpec {
 
         }
 
-        @Unroll({'make a $verb request using the authorised connection'})
+        @Unroll({"make a ${verb} request using the authorised connection"})
         def 'make a request using the authorised connection'() {
 
             given:
 
-                oaService.service = mock(OAuthService)
+                oaService.services['twitter'].service = mock(OAuthService)
 
             and:
             
@@ -102,7 +107,7 @@ class AuthorisationProcessSpec extends UnitSpec {
             and:
 
                 oaService.oauthResourceService = mock(OauthResourceService)
-                oaService.oauthResourceService.accessResource(oaService.service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, 30000, 30000).returns(oaResponse)
+                oaService.oauthResourceService.accessResource(oaService.services['twitter'].service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, 30000, 30000).returns(oaResponse)
 
             when:
 
@@ -113,7 +118,7 @@ class AuthorisationProcessSpec extends UnitSpec {
 
                 simulate {
 
-                    def actualResponse = oaService."${verb.name().toLowerCase()}Resource"(accessToken, DUMMY_OAUTH_RESOURCE_URI)
+                    def actualResponse = oaService."${verb.name().toLowerCase()}TwitterResource"(accessToken, DUMMY_OAUTH_RESOURCE_URI)
                     body = actualResponse.body
                     code = actualResponse.code
 
@@ -140,6 +145,23 @@ class AuthorisationProcessSpec extends UnitSpec {
             then:
 
                 thrown(MissingMethodException)
+
+            when:
+
+                oaService.punchTwitterResource(accessToken, 'anyUrl')
+
+            then:
+
+                thrown(MissingMethodException)
+
+            when:
+
+                oaService.putWonkyResource(accessToken, 'anyUrl')
+
+            then:
+
+                thrown(UnknownProviderException)
+
 
         }
 

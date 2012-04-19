@@ -2,6 +2,7 @@ package uk.co.desirableobjects.oauth.scribe
 
 import org.scribe.model.Verifier
 import org.scribe.model.Token
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class OauthController {
 
@@ -11,31 +12,34 @@ class OauthController {
 
     def callback = {
 
-        Verifier verifier = extractVerifier(params)
+        String providerName = params.provider
+        OauthProvider provider = oauthService.findProviderConfiguration(providerName)
+
+        Verifier verifier = extractVerifier(provider, params)
 
         if (!verifier) {
-            return redirect(uri: oauthService.failureUri)
+            return redirect(uri: provider.failureUri)
         }
 
-        Token requestToken = (Token) session[OauthService.REQUEST_TOKEN_SESSION_KEY]
-        Token accessToken = oauthService.getAccessToken(requestToken, verifier)
+        Token requestToken = (Token) session[oauthService.findSessionKeyForRequestToken(providerName)]
+        Token accessToken = oauthService.getAccessToken(providerName, requestToken, verifier)
 
-        session[OauthService.ACCESS_TOKEN_SESSION_KEY] = accessToken
-        session.removeAttribute(OauthService.REQUEST_TOKEN_SESSION_KEY)
+        session[oauthService.findSessionKeyForAccessToken(providerName)] = accessToken
+        session.removeAttribute(oauthService.findSessionKeyForRequestToken(providerName))
 
-        return redirect(uri: oauthService.successUri)
+        return redirect(uri: provider.successUri)
 
     }
 
-    private extractVerifier(params) {
+    private Verifier extractVerifier(OauthProvider provider, GrailsParameterMap params) {
         
         String verifierKey = 'oauth_verifier'
-        if (oauthService.oauthVersion==SupportedOauthVersion.TWO) {
+        if (SupportedOauthVersion.TWO == provider.oauthVersion) {
             verifierKey = 'code'
         }
 
         if (!params[verifierKey]) {
-             log.error("Cannot authenticate with oauth: Could not find oauth verifier in ${params}")
+             log.error("Cannot authenticate with oauth: Could not find oauth verifier in ${params}.")
              return null
         }
 
@@ -46,13 +50,16 @@ class OauthController {
 
     def authenticate = {
 
+        String providerName = params.provider
+        OauthProvider provider = oauthService.findProviderConfiguration(providerName)
+
         Token requestToken = EMPTY_TOKEN
-        if (oauthService.getOauthVersion() == SupportedOauthVersion.ONE) {
-            requestToken = oauthService.requestToken
+        if (provider.getOauthVersion() == SupportedOauthVersion.ONE) {
+            requestToken = provider.service.requestToken
         }
 
-        session[OauthService.REQUEST_TOKEN_SESSION_KEY] = requestToken
-        String url = oauthService.getAuthorizationUrl(requestToken)
+        session[oauthService.findSessionKeyForRequestToken(providerName)] = requestToken
+        String url = oauthService.getAuthorizationUrl(providerName, requestToken)
         
         return redirect(url: url)
     }

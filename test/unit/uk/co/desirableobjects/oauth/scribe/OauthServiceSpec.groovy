@@ -12,7 +12,6 @@ import org.scribe.model.Token
 import org.gmock.WithGMock
 import org.scribe.builder.ServiceBuilder
 
-@Mixin(GMockAddon)
 class OauthServiceSpec extends UnitSpec {
 
     def 'Configuration is missing'() {
@@ -25,6 +24,64 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
+    def 'OAuthService can handle multiple providers'() {
+
+        given:
+            mockConfig """
+                import org.scribe.builder.api.TwitterApi
+                import org.scribe.builder.api.FacebookApi
+
+                oauth {
+                    providers {
+                        twitter {
+                            api = TwitterApi
+                            key = 'twitter'
+                            secret = 'identica'
+                        }
+                        facebook {
+                            api = FacebookApi
+                            key = 'zuckerberg'
+                            secret = 'brothers'
+                        }
+                    }
+                }
+            """
+
+        expect:
+            OauthService service = new OauthService()
+            service.services.size() == 2
+
+    }
+
+    def 'OAuthService lower-cases provider names'() {
+
+        given:
+            mockConfig """
+                import org.scribe.builder.api.TwitterApi
+                import org.scribe.builder.api.FacebookApi
+
+                oauth {
+                    providers {
+                        twitter {
+                            api = TwitterApi
+                            key = 'twitter'
+                            secret = 'identica'
+                        }
+                        FaceBook {
+                            api = FacebookApi
+                            key = 'zuckerberg'
+                            secret = 'brothers'
+                        }
+                    }
+                }
+            """
+
+        expect:
+            OauthService service = new OauthService()
+            service.services.keySet() == ['twitter', 'facebook'] as Set<String>
+
+    }
+
     @Unroll({"Configuration contains ${provider} provider"})
     def 'Configuration contains valid provider'() {
 
@@ -33,9 +90,13 @@ class OauthServiceSpec extends UnitSpec {
                 import org.scribe.builder.api.TwitterApi
 
                 oauth {
-                    provider = TwitterApi
-                    key = 'myKey'
-                    secret = 'mySecret'
+                    providers {
+                        twitter {
+                            api = TwitterApi
+                            key = 'myKey'
+                            secret = 'mySecret'
+                        }
+                    }
                 }
             """
 
@@ -59,9 +120,13 @@ class OauthServiceSpec extends UnitSpec {
                 import org.scribe.builder.api.TwitterApi
 
                 oauth {
-                    provider = TwitterApi
-                    key = 'myKey'
-                    secret = 'mySecret'
+                    providers {
+                        twitter {
+                            api = TwitterApi
+                            key = 'myKey'
+                            secret = 'mySecret'
+                        }
+                    }
                     debug = ${debug}
                 }
             """
@@ -89,10 +154,14 @@ class OauthServiceSpec extends UnitSpec {
                 import org.scribe.builder.api.TwitterApi
 
                 oauth {
-                    provider = TwitterApi
-                    key = 'myKey'
-                    secret = 'mySecret'
-                    ${scope ? "scope = 'testScope'" : ""}
+                    providers {
+                        twitter {
+                            api = TwitterApi
+                            key = 'myKey'
+                            secret = 'mySecret'
+                            ${scope ? "scope = 'testScope'" : ""}
+                        }
+                    }
                 }
             """
 
@@ -116,12 +185,15 @@ class OauthServiceSpec extends UnitSpec {
 
             when:
                 mockConfig """
-                    import uk.co.desirableobjects.oauth.scribe.OauthServiceSpec.InvalidProviderApi
 
                     oauth {
-                        provider = 'some custom string'
-                        key = 'myKey'
-                        secret = 'mySecret'
+                        providers {
+                            invalid {
+                                api = 'some custom string'
+                                key = 'myKey'
+                                secret = 'mySecret'
+                            }
+                        }
                     }
                 """
 
@@ -140,9 +212,13 @@ class OauthServiceSpec extends UnitSpec {
                     import uk.co.desirableobjects.oauth.scribe.OauthServiceSpec.InvalidProviderApi
 
                     oauth {
-                        provider = InvalidProviderApi
-                        key = 'myKey'
-                        secret = 'mySecret'
+                        providers {
+                            invalid {
+                                api = InvalidProviderApi
+                                key = 'myKey'
+                                secret = 'mySecret'
+                            }
+                        }
                     }
                 """
 
@@ -161,12 +237,21 @@ class OauthServiceSpec extends UnitSpec {
         given:
 
             mockConfig """
-                import org.scribe.builder.api.TwitterApi
+                import org.scribe.builder.api.*
 
                 oauth {
-                    provider = TwitterApi
-                    key = ${key}
-                    secret = ${secret}
+                    providers {
+                        twitter {
+                            api = TwitterApi
+                            key = ${key}
+                            secret = ${secret}
+                        }
+                        facebook {
+                            api = FacebookApi
+                            key = 'facebook-key'
+                            secret = 'facebook-secret'
+                        }
+                    }
                 }
             """
 
@@ -196,11 +281,15 @@ class OauthServiceSpec extends UnitSpec {
                     import org.scribe.model.SignatureType
 
                     oauth {
-                        provider = TwitterApi
-                        key = 'myKey'
-                        secret = 'mySecret'
-                        callback = 'http://example.com:1234/url'
-                        signatureType = SignatureType.QueryString
+                        providers {
+                            twitter {
+                                api = TwitterApi
+                                key = 'myKey'
+                                secret = 'mySecret'
+                                callback = 'http://example.com:1234/url'
+                                signatureType = SignatureType.QueryString
+                            }
+                        }
                     }
                 """
 
@@ -219,11 +308,15 @@ class OauthServiceSpec extends UnitSpec {
                 import org.scribe.model.SignatureType
 
                 oauth {
-                    provider = TwitterApi
-                    key = 'myKey'
-                    secret = 'mySecret'
-                    successUri = '/coffee/tea'
-                    failureUri = '/cola/pepsi'
+                    providers {
+                        twitter {
+                            api = TwitterApi
+                            key = 'myKey'
+                            secret = 'mySecret'
+                            successUri = '/coffee/tea'
+                            failureUri = '/cola/pepsi'
+                        }
+                    }
                 }
             '''
 
@@ -233,8 +326,8 @@ class OauthServiceSpec extends UnitSpec {
 
         then:
 
-            service.successUri == '/coffee/tea'
-            service.failureUri == '/cola/pepsi'
+            service.services.twitter.successUri == '/coffee/tea'
+            service.services.twitter.failureUri == '/cola/pepsi'
 
     }
 
@@ -247,11 +340,13 @@ class OauthServiceSpec extends UnitSpec {
                 import org.scribe.model.SignatureType
 
                 oauth {
-                    provider = TwitterApi
-                    key = 'myKey'
-                    secret = 'mySecret'
-                    successUri = '/coffee/tea'
-                    failureUri = '/cola/pepsi'
+                    providers {
+                        twitter {
+                            api = TwitterApi
+                            key = 'myKey'
+                            secret = 'mySecret'
+                        }
+                    }
                     connectTimeout = 5000
                     receiveTimeout = 5000
                 }
@@ -272,26 +367,27 @@ class OauthServiceSpec extends UnitSpec {
     def 'if connection and recieve timeouts are not set, they are defaulted to thirty seconds'() {
 
         given:
-
             mockConfig '''
                 import org.scribe.builder.api.TwitterApi
                 import org.scribe.model.SignatureType
 
                 oauth {
-                    provider = TwitterApi
-                    key = 'myKey'
-                    secret = 'mySecret'
-                    successUri = '/coffee/tea'
-                    failureUri = '/cola/pepsi'
+                    providers {
+                        twitter {
+                            api = TwitterApi
+                            key = 'myKey'
+                            secret = 'mySecret'
+                            successUri = '/coffee/tea'
+                            failureUri = '/cola/pepsi'
+                        }
+                    }
                 }
             '''
 
         when:
-
             OauthService service = new OauthService()
 
         then:
-
             service.connectTimeout == 30000
             service.receiveTimeout == 30000
 
@@ -306,12 +402,13 @@ class OauthServiceSpec extends UnitSpec {
                 import org.scribe.model.SignatureType
 
                 oauth {
-                    provider = ${apiClass}
-                    key = 'myKey'
-                    secret = 'mySecret'
-                    callback = 'http://localhost:8080/hi'
-                    successUri = '/coffee/tea'
-                    failureUri = '/cola/pepsi'
+                    providers {
+                        dynamic {
+                            api = ${apiClass}
+                            key = 'myKey'
+                            secret = 'mySecret'
+                        }
+                    }
                 }
             """
 
@@ -321,7 +418,7 @@ class OauthServiceSpec extends UnitSpec {
 
         then:
 
-            service.oauthVersion == apiVersion
+            service.services.dynamic.oauthVersion == apiVersion
 
         where:
             apiClass                                                               | apiVersion
@@ -329,6 +426,8 @@ class OauthServiceSpec extends UnitSpec {
             'org.scribe.builder.api.FacebookApi'                                   | SupportedOauthVersion.TWO
 
     }
+
+    // TODO: What if a dynamic provider requestToken, accessToken etc provider name is not known?
 
     class InvalidProviderApi {
 

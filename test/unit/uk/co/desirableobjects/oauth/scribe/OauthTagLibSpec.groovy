@@ -5,9 +5,12 @@ import org.gmock.WithGMock
 import org.scribe.model.Token
 import org.scribe.model.Verifier
 import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
+import grails.test.mixin.TestFor
+import spock.lang.Specification
+import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 
-@Mixin(GMockAddon)
-class OauthTagLibSpec extends TagLibSpec {
+@TestFor(OauthTagLib)
+class OauthTagLibSpec extends Specification {
 
     Map assertions = [:]
 
@@ -27,11 +30,23 @@ class OauthTagLibSpec extends TagLibSpec {
 
         when:
 
-            tagLib.connect([:], { 'Click here to authorise' } )
+            tagLib.connect([provider:'twitter'], { 'Click here to authorise' } )
 
         then:
 
             asExpectations()
+
+    }
+
+    def 'an oauth link tag fails if provider is not specified'() {
+
+        when:
+
+            tagLib.connect([:], { 'Click here to authorise' } )
+
+        then:
+
+            thrown GrailsTagException
 
     }
 
@@ -59,7 +74,7 @@ class OauthTagLibSpec extends TagLibSpec {
 
         when:
 
-            tagLib.connect(['class':'ftw'], { 'Click here to authorise' } )
+            tagLib.connect([provider: 'twitter', 'class':'ftw'], { 'Click here to authorise' } )
 
         then:
 

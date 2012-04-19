@@ -12,28 +12,33 @@ import org.scribe.model.Verifier
 import org.scribe.model.Verb
 import org.scribe.model.Response
 import org.scribe.model.SignatureType
+import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
+import uk.co.desirableobjects.oauth.scribe.util.DynamicMethods
 
 class OauthService {
 
     private static final int THIRTY_SECONDS = 30000
-    protected OAuthService service
+    private Map<String, OauthProvider> services = [:]
     OauthResourceService oauthResourceService
 
-    public static final String REQUEST_TOKEN_SESSION_KEY = 'oasRequestToken'
-    public static final String ACCESS_TOKEN_SESSION_KEY = 'oasAccessToken'
-
-    String successUri
-    String failureUri
     private int connectTimeout
     private int receiveTimeout
 
+    String findSessionKeyForRequestToken(String providerName) {
+        return "${providerName}:oasRequestToken"
+    }
+
+    String findSessionKeyForAccessToken(String providerName) {
+        return "${providerName}:oasAccessToken"
+    }
+    
     OauthService() {
 
         ConfigObject conf = fetchConfig()
 
         try {
 
-            service = buildService(conf)
+            buildService(conf)
 
         } catch (GroovyCastException gce) {
             throw new InvalidOauthProviderException("${CH.config.oauth.provider} is not a Class" as String)
@@ -41,49 +46,73 @@ class OauthService {
             throw new InvalidOauthProviderException("${CH.config.oauth.provider} does not implement the Api interface" as String, oae)
         }
 
-        configureProvider(conf)
+        configureTimeouts(conf)
 
     }
 
-    private void configureProvider(ConfigObject conf) {
+    private void configureTimeouts(ConfigObject conf) {
 
-        successUri = conf.successUri
-        failureUri = conf.failureUri
         connectTimeout = conf.containsKey('connectTimeout') ? conf.connectTimeout : THIRTY_SECONDS
         receiveTimeout = conf.containsKey('receiveTimeout') ? conf.receiveTimeout : THIRTY_SECONDS
 
     }
 
-    private OAuthService buildService(ConfigObject conf) {
+    private void buildService(ConfigObject conf) {
 
-        Class provider = conf.provider
-        String callback = conf.containsKey('callback') ? conf.callback : null
-        SignatureType signatureType = conf.containsKey('signatureType') ? conf.signatureType : null
-        boolean debug = (conf.debug == true) ?: false
-        String scope = conf.containsKey('scope') ? conf.scope : null
+        boolean debug = (conf.debug) ?: false
+        
+        conf.providers.each { LinkedHashMap.Entry configuration ->
 
-        ServiceBuilder serviceBuilder = new ServiceBuilder()
-        .provider(provider)
-        .apiKey(conf.key as String)
-        .apiSecret(conf.secret as String)
+                verifyConfiguration(configuration)
 
-        if (callback) {
-            serviceBuilder.callback(callback)
+                String name = configuration.key.toString().toLowerCase()
+                LinkedHashMap providerConfig = configuration.value
+
+                Class api = providerConfig.api
+                String callback = providerConfig.containsKey('callback') ? providerConfig.callback : null
+                SignatureType signatureType = providerConfig.containsKey('signatureType') ? providerConfig.signatureType : null
+                String scope = providerConfig.containsKey('scope') ? providerConfig.scope : null
+
+                ServiceBuilder serviceBuilder = new ServiceBuilder()
+                        .provider(api)
+                        .apiKey(providerConfig.key as String)
+                        .apiSecret(providerConfig.secret as String)
+
+                if (callback) {
+                    serviceBuilder.callback(callback)
+                }
+
+                if (signatureType) {
+                    serviceBuilder.signatureType(signatureType)
+                }
+
+                if (scope) {
+                    serviceBuilder.scope(scope)
+                }
+
+                if (debug) {
+                    serviceBuilder.debug()
+                }
+
+                OauthProvider provider = new OauthProvider(
+                    service: serviceBuilder.build(),
+                    successUri: providerConfig.successUri,
+                    failureUri: providerConfig.failureUri
+                )
+
+                services.put(name, provider)
+
         }
 
-        if (signatureType) {
-            serviceBuilder.signatureType(signatureType)
+
+    }
+
+    private void verifyConfiguration(LinkedHashMap.Entry conf) {
+
+        if (!conf.value.key || !conf.value.secret) {
+            throw new IllegalStateException("Missing oauth secret or key (or both!) in configuration for ${conf.key}.")
         }
 
-        if (scope) {
-            serviceBuilder.scope(scope)
-        }
-
-        if (debug) {
-            serviceBuilder.debug()
-        }
-
-        service = serviceBuilder.build()
     }
 
     private ConfigObject fetchConfig() {
@@ -94,40 +123,58 @@ class OauthService {
 
         ConfigObject conf = CH.config.oauth
 
-        if (!conf.key || !conf.secret) {
-            throw new IllegalStateException("Missing oauth secret or key (or both!) in configuration.")
-        }
-
         return conf
     }
 
-    Token getRequestToken() {
+    private Token getRequestToken(String serviceName) {
 
-        return service.requestToken
-
-    }
-
-    String getAuthorizationUrl(Token token) {
-
-        return service.getAuthorizationUrl(token)
+        return findService(serviceName).getRequestToken()
 
     }
 
-    Token getAccessToken(Token token, Verifier verifier) {
+    String getAuthorizationUrl(String serviceName, Token token) {
 
-        return service.getAccessToken(token, verifier)
+        return findService(serviceName).getAuthorizationUrl(token)
+
+    }
+
+    Token getAccessToken(String serviceName, Token token, Verifier verifier) {
+
+        return findService(serviceName).getAccessToken(token, verifier)
 
     }
 
     def methodMissing(String name, args) {
 
-       if( name ==~ /^.*Resource/) {
+       if( name ==~ /^.*RequestToken/) {
+           
+           String provider = DynamicMethods.extractKeyword(name, /^get(.*)RequestToken/)
+           return this.getRequestToken(provider)
 
-              def m = name =~ /^(.*)Resource/
+       }
+
+       if( name ==~ /^.*AuthorizationUrl/) {
+
+            String provider = DynamicMethods.extractKeyword(name, /^get(.*)AuthorizationUrl/)
+            return this.getAuthorizationUrl(provider, args[0])
+
+       }
+
+       if( name ==~ /^.*AccessToken/) {
+
+            String provider = DynamicMethods.extractKeyword(name, /^get(.*)AccessToken/)
+            return this.getAccessToken(provider, args[0], args[1])
+
+       }
+
+       if( name ==~ /^(get|put|post|delete|options|head).*Resource/) {
+
+              def m = name =~ /^(get|put|post|delete|options|head)(.*)Resource/
               String verb = (String) m[0][1]
+              String serviceName = (String) m[0][2].toString().toLowerCase()
 
               if (Verb.values()*.name().find { it == verb.toUpperCase() } ) {
-                  return this.accessResource(args[0] as Token, verb, args[1] as String)
+                  return this.accessResource(serviceName, args[0] as Token, verb, args[1] as String)
               }
 
        }
@@ -136,15 +183,26 @@ class OauthService {
 
     }
 
-    Response accessResource(Token accessToken, String verbName, String url) {
+    Response accessResource(String serviceName, Token accessToken, String verbName, String url) {
 
         Verb verb = Verb.valueOf(verbName.toUpperCase())
-        return oauthResourceService.accessResource(service, accessToken, verb, url, connectTimeout, receiveTimeout)
+        return oauthResourceService.accessResource(findService(serviceName), accessToken, verb, url, connectTimeout, receiveTimeout)
         
     }
 
-    SupportedOauthVersion getOauthVersion() {
-        return SupportedOauthVersion.parse(service.version)
+    protected OAuthService findService(String providerName) {
+
+        return findProviderConfiguration(providerName).service
+    }
+
+    public OauthProvider findProviderConfiguration(String providerName) {
+
+        if (!services.containsKey(providerName)) {
+            throw new UnknownProviderException(providerName)
+        }
+
+        return services[providerName]
+
     }
 
 }
