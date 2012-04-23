@@ -81,8 +81,8 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
-    @Unroll({"Configuration contains ${provider} provider"})
-    def 'Configuration contains valid provider'() {
+    @Unroll
+    def 'Configuration contains valid provider #provider'() {
 
         given:
             mockConfig """
@@ -107,8 +107,8 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
-    @Unroll({"Configuration enables debug support when debug = ${debug}"})
-    def 'Configuration enables debugging support'() {
+    @Unroll()
+    def 'Configuration enables debugging support when debug = #debug'() {
 
         given:
 
@@ -141,8 +141,8 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
-    @Unroll({"Configuration includes or excludes a scope when scope is = ${scope}"})
-    def 'Configuration includes scope'() {
+    @Unroll
+    def 'Configuration includes or excludes scope when scope is #scope'() {
 
         given:
 
@@ -229,8 +229,8 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
-    @Unroll({"Configuration is provided with invalid key (${key}) or secret (${secret})"})
-    def 'Configuration is missing keys and or secrets'() {
+    @Unroll
+    def 'Configuration is provided with invalid key #key or secret #secret'() {
 
 
         given:
@@ -392,8 +392,8 @@ class OauthServiceSpec extends UnitSpec {
 
     }
 
-    @Unroll({"Service returns correct API version when given ${apiClass}"})
-    def 'Service returns correct API version'() {
+    @Unroll
+    def 'Service returns correct API version when given #apiClass'() {
 
         given:
 
