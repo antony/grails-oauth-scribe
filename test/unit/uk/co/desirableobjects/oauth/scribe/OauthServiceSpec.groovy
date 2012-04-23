@@ -8,8 +8,7 @@ import org.scribe.model.OAuthConfig
 import org.scribe.builder.api.TwitterApi
 
 import spock.lang.Unroll
-import org.scribe.model.Token
-import org.gmock.WithGMock
+
 import org.scribe.builder.ServiceBuilder
 
 class OauthServiceSpec extends UnitSpec {

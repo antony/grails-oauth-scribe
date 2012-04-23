@@ -18,7 +18,7 @@ import uk.co.desirableobjects.oauth.scribe.util.DynamicMethods
 class OauthService {
 
     private static final int THIRTY_SECONDS = 30000
-    private Map<String, OauthProvider> services = [:]
+    Map<String, OauthProvider> services = [:]
     OauthResourceService oauthResourceService
 
     private int connectTimeout
@@ -61,7 +61,7 @@ class OauthService {
 
         boolean debug = (conf.debug) ?: false
         
-        conf.providers.each { LinkedHashMap.Entry configuration ->
+        conf.providers.each { configuration ->
 
                 verifyConfiguration(configuration)
 
@@ -107,7 +107,7 @@ class OauthService {
 
     }
 
-    private void verifyConfiguration(LinkedHashMap.Entry conf) {
+    private void verifyConfiguration(conf) {
 
         if (!conf.value.key || !conf.value.secret) {
             throw new IllegalStateException("Missing oauth secret or key (or both!) in configuration for ${conf.key}.")

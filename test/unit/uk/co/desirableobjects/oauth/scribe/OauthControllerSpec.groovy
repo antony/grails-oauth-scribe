@@ -141,6 +141,7 @@ class OauthControllerSpec extends Specification {
 
     }
 
-    // TODO:  {"error":{"message":"Error validating client secret.","type":"OAuthException"}}
+    // TODO: {"error":{"message":"Error validating client secret.","type":"OAuthException"}}
+    // TODO: Catch and deal with timeouts in a sensible way.
 
 }

@@ -39,6 +39,8 @@ Adding a second provider is as easy as adding your provider-specific configurati
 
 h2. Adding a callback URI
 
+Some providers allow for a callback URI to be specified on the providers side. If you would prefer to pass the callback as you make the authentication request, you can do so by configuring the callback parameter in the configuration.
+
 A callback uri can be specified at the provider level:
 
 {code}
@@ -48,11 +50,15 @@ A callback uri can be specified at the provider level:
               api = TwitterApi
               key = 'my-key'
               secret = 'my-secret'
-              callback = 'http://example.org:1234/callback.uri'
+              callback = "${application.baseUrl}/oauth/twitter/callback"
           }
       }
   }
 {code}
+
+{note}
+You can specify whatever you'd like for a callback, but the format http://yourApp.url/oauth/providerName/callback will allow for the built-in oauth callback controller to add the accessToken details into your application's session as detailed in '4. Using the Plugin'.
+{note}
 
 h2. Adding a SignatureType
 

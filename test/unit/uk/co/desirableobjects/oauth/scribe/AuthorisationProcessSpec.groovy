@@ -90,6 +90,7 @@ class AuthorisationProcessSpec extends UnitSpec {
 
         }
 
+        // TODO: Why do we fetch and pass the token - if we don't pass it, you could automatically get it?
         @Unroll({"make a ${verb} request using the authorised connection"})
         def 'make a request using the authorised connection'() {
 

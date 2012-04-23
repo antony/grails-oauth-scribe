@@ -11,7 +11,7 @@ enum SupportedOauthVersion {
     }
     
     static SupportedOauthVersion parse(String versionString) {
-        return SupportedOauthVersion.values().find { SupportedOauthVersion supportedVersion ->
+        return values().find { SupportedOauthVersion supportedVersion ->
             supportedVersion.scribeVersion == versionString
         }
     }

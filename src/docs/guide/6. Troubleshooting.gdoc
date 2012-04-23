@@ -1,3 +1,9 @@
-h1. Debugging requests
+h1. Troubleshooting
+
+h2. Debugging requests
 
 As shown in the configuration section, it is possible to provide the debug flag in your global oauth configuration, which will log all http traffic (request and response) to the console.
+
+h2. When the callback is hit, my requestToken is no longer in the session!
+
+Because of the way sessions work in a JEE container, if your app is running at say @http://localhost:8080/@ and your callback url is something like @http://staging.your-app.cloudfoundry.com/oauth/twitter/callback@ you will get a different session when your callback is hit! Make sure that your browser's URL bar shows the same domain and port that your callback points to, otherwise you won't be seeing the same session.
