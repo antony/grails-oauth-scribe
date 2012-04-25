@@ -18,7 +18,7 @@ This tag will work automatically on its own can also accept any standard paramet
 
 h1. Receiving the oauth AccessToken
 
-After a user clicks your link, they will be sent back to the successUrl you specified in your configuration (or failureUrl if something went wrong). At this point there will be a session variable called 'providerName:oasAccessToken' (where providerName is one of your configured provider names) which contains an <tt>org.scribe.model.Token</tt> instance, which is your Access Token.
+After a user clicks your link, they will be sent back to the successUrl you specified in your configuration (or failureUrl if something went wrong). At this point there will be a session variable called @providerName:oasAccessToken@ (where providerName is one of your configured provider names) which contains an @org.scribe.model.Token@ instance, which is your Access Token.
 
 It is recommended not to tie yourself to the name of the session key listed in the previous paragraph. To avoid this situation, the method @OauthService.findSessionKeyForAccessToken@ which takes your provider name as its only parameter should be used to determine the session key, as follows:
 

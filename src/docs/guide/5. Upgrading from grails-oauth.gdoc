@@ -1,0 +1,56 @@
+grails-oauth vesion 2.x is a ground-up rewrite of the previous plugin (< 1.x), with a number of small differences in its set-up.
+
+This quick guide will attempt to make the transition as seamless as possible.
+
+h2. Configuration
+
+The configuration block's structure remains mainly the same, with the important changes documented below
+
+{table}
+*Old Configuration Directive* | *New Configuration Directive*
+requestTokenUrl               | Replaced with 'api' class, see [3. Further Configuration]
+accessTokenUrl                | Replaced with 'api' class, see [3. Further Configuration]
+authUrl                       | Replaced with 'api' class, see [3. Further Configuration]
+consumer.key                  | key
+consumer.secret               | secret
+{table}
+
+{note}
+The plugin does not currently support multiple consumers, it is recommended to set up multiple providers with different names if you need this functionality.
+{note}
+
+h2. In the view layer (GSP)
+
+The oauth link tag has become much more simplified:
+
+{code}
+<g:oauthLink consumer='myConsumer'
+             returnTo="[controller: 'myController', action: 'oauthComplete']">Authorize</g:oauthLink>
+{code}
+
+becomes simply
+
+{code}
+<oauth:connect provider="myConsumer">Authorize</oauth:connect>
+{code}
+
+{note}
+The 'returnTo' directive above has been moved into your configuration as 'successUri' and 'failureUri'. See [3. Further Configuration] for further details.
+{note}
+
+h2. Accessing oauth protected resources
+
+Accessing resources is now done via convention rather than configuration, so the following block of code
+
+{code}
+def response = oauthService.accessResource(url: 'http://api.url', consumer: 'twitter',
+    token:[key: 'accesskey', secret: 'accesssecret'], method: 'POST')
+{code}
+
+can be implemented as
+
+{code}
+def response = oauthService.postTwitterResource(twitterAccessToken, 'http://api.url')
+{code}
+
+where 'Twitter' is the provider name, twitterAccessToken is an instance of @org.scribe.model.Token@ and the second parameter is the url of the oauth protected resource you are trying to access.

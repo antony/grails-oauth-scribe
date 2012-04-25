@@ -1,5 +1,3 @@
-h1. Troubleshooting
-
 h2. Debugging requests
 
 As shown in the configuration section, it is possible to provide the debug flag in your global oauth configuration, which will log all http traffic (request and response) to the console.
