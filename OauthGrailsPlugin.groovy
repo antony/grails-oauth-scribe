@@ -12,7 +12,7 @@ class OauthGrailsPlugin {
 
     def author = "Antony Jones"
     def authorEmail = "aj#desirableobjects.co.uk"
-    def title = "Oauth Scribe Plugin"
+    def title = "Oauth Plugin"
     def description = 'Provides oAuth integration for Grails, using the Scribe framework'
 
     def documentation = "http://aiten.github.com/grails-oauth-scribe/"
