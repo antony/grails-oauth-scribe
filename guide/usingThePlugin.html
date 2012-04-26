@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>4 Using the Plugin 2.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/quickStart.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/furtherConfiguration.html"><strong>3</strong><span>Further Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/usingThePlugin.html"><strong>4</strong><span>Using the Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/upgradingFromGrails-oauth.html"><strong>5</strong><span>Upgrading from grails-oauth</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/troubleshooting.html"><strong>6</strong><span>Troubleshooting</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Provides oAuth integration for Grails, using the Scribe framework</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/furtherConfiguration.html">&lt;&lt; <strong>3</strong><span>Further Configuration</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/upgradingFromGrails-oauth.html"><strong>5</strong><span>Upgrading from grails-oauth</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>4 Using the Plugin - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Antony Jones</p>
+
+                    <p><strong>Version:</strong> 2.0</p>
+
+                    
+                </div>
+
+                
+
+                
+<a name="4. Using the Plugin"><!-- Legacy link --></a>
+<h1 id="usingThePlugin">4 Using the Plugin</h1>
+Using the oauth plugin in your application requires a few simple steps.<p class="paragraph"/><h1>Using the Tag Library</h1><p class="paragraph"/>To render a user-clickable link in your application which will direct them to a provider's authentication page, use the <code>connect</code> tag:<p class="paragraph"/><div class="code"><pre>&#60;oauth:connect provider=<span class="java&#45;quote">"twitter"</span>&#62;Connect to Twitter&#60;/oauth:connect&#62;</pre></div><p class="paragraph"/>The provider attribute is required and relates to one of the providers specified in your configuration.<p class="paragraph"/>This tag will work automatically on its own can also accept any standard parameters that the <code>&#60;g:link /&#62;</code> tag can accept, for example, to set a css id on the generated link:<p class="paragraph"/><div class="code"><pre>&#60;oauth:connect provider=<span class="java&#45;quote">"facebook"</span> id=<span class="java&#45;quote">"facebook&#45;connect&#45;link"</span>&#62;Connect to Facebook&#60;/oauth:connect&#62;</pre></div><p class="paragraph"/><h1>Receiving the oauth AccessToken</h1><p class="paragraph"/>After a user clicks your link, they will be sent back to the successUrl you specified in your configuration (or failureUrl if something went wrong). At this point there will be a session variable called <code>providerName:oasAccessToken</code> (where providerName is one of your configured provider names) which contains an <code>org.scribe.model.Token</code> instance, which is your Access Token.<p class="paragraph"/>It is recommended not to tie yourself to the name of the session key listed in the previous paragraph. To avoid this situation, the method <code>OauthService.findSessionKeyForAccessToken</code> which takes your provider name as its only parameter should be used to determine the session key, as follows:<p class="paragraph"/><div class="code"><pre>class MyClass &#123;
+    OauthService oauthService // or <span class="java&#45;keyword">new</span> OauthService() would work <span class="java&#45;keyword">if</span> you're not in a spring&#45;managed class.<p class="paragraph"/>    Token getToken() &#123;<p class="paragraph"/>        <span class="java&#45;object">String</span> sessionKey = oauthService.findSessionKeyForAccessToken('twitter')
+        <span class="java&#45;keyword">return</span> session&#91;sessionKey&#93;<p class="paragraph"/>    &#125;
+&#125;</pre></div><p class="paragraph"/>would give you the access token for the 'twitter' provider which you can then use to make requests, as below.<p class="paragraph"/><h1>Requesting a resource using your AccessToken</h1><p class="paragraph"/>Provided your access token is now present, you now can request oauth protected resources from your third-party provider!<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> uk.co.desirableobjects.oauth.scribe.OauthService<p class="paragraph"/>class MyService &#123;
+    OauthService oauthService<p class="paragraph"/>    def myMethod() &#123;
+        Token twitterAccessToken = session&#91;oauthService.findSessionKeyForAccessToken('twitter')&#93;
+        Token linkedInAccessToken = session&#91;oauthService.findSessionKeyForAccessToken('linkedin')&#93;<p class="paragraph"/>        oauthService.getTwitterResource(twitterAccessToken, 'http://api.yourprovider.com/users/list')
+        oauthService.postLinkedInResource(linkedInAccessToken, 'http://api.yourprovider.com/users/list')
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The convention used for accessing resources is <code>OauthService.&#60;method&#62;&#60;provider&#62;Resource(accessToken, url)</code>.<p class="paragraph"/>In the above example:<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">component</strong></th><th><strong class="bold">description</strong></th></tr><tr class="table-odd"><td><strong class="bold">method</strong></td><td>is the HTTP method used, one of put, post, get, delete, head, or options.</td></tr><tr class="table-even"><td><strong class="bold">url</strong></td><td>is the url of the oauth-protected resource you are trying to access.</td></tr><tr class="table-odd"><td><strong class="bold">provider</strong></td><td>is the provider name configured in your oauth configuration.</td></tr><tr class="table-even"><td><strong class="bold">accessToken</strong></td><td>is the access token you were given (via the session) when the user authenticated themselves with the provider.</td></tr></table><p class="paragraph"/>
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/furtherConfiguration.html">&lt;&lt; <strong>3</strong><span>Further Configuration</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/upgradingFromGrails-oauth.html"><strong>5</strong><span>Upgrading from grails-oauth</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

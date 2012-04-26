@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>3 Further Configuration 2.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/1.%20Introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/2.%20Quick%20Start.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/3.%20Further%20Configuration.html"><strong>3</strong><span>Further Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/4.%20Using%20the%20Plugin.html"><strong>4</strong><span>Using the Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/5.%20Upgrading%20from%20grails-oauth.html"><strong>5</strong><span>Upgrading from grails-oauth</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/6.%20Troubleshooting.html"><strong>6</strong><span>Troubleshooting</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Provides oAuth integration for Grails, using the Scribe framework</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/2.%20Quick%20Start.html">&lt;&lt; <strong>2</strong><span>Quick Start</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/4.%20Using%20the%20Plugin.html"><strong>4</strong><span>Using the Plugin</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>3 Further Configuration - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Antony Jones</p>
+
+                    <p><strong>Version:</strong> 2.0</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h1 id="3. Further Configuration">3 Further Configuration</h1>
+Provided that you have read the Quick Start guide, you should have some configuration which looks a little like this:<p class="paragraph"/><div class="code"><pre>oauth &#123;
+        providers &#123;
+            twitter &#123;
+                api = TwitterApi
+                key = 'my&#45;key'
+                secret = 'my&#45;secret'
+            &#125;
+        &#125;
+    &#125;</pre></div><p class="paragraph"/>You're now in a good position to configure some further elements of the plugin if you need to.<p class="paragraph"/><h1>Provider specific configuration</h1><p class="paragraph"/><h2>Adding a second provider</h2><p class="paragraph"/>Adding a second provider is as easy as adding your provider-specific configuration to the providers block:<p class="paragraph"/><div class="code"><pre>oauth &#123;
+        providers &#123;
+            twitter &#123;
+                api = TwitterApi
+                key = 'my&#45;key'
+                secret = 'my&#45;secret'
+            &#125;
+            facebook &#123;
+                api = FacebookApi
+                key = 'other&#45;key'
+                secret = 'other&#45;secret'
+            &#125;
+        &#125;
+    &#125;</pre></div><p class="paragraph"/><h2>Adding a callback URI</h2><p class="paragraph"/>Some providers allow for a callback URI to be specified on the providers side. If you would prefer to pass the callback as you make the authentication request, you can do so by configuring the callback parameter in the configuration.<p class="paragraph"/>A callback uri can be specified at the provider level:<p class="paragraph"/><div class="code"><pre>oauth &#123;
+      providers &#123;
+          twitter &#123;
+              api = TwitterApi
+              key = 'my&#45;key'
+              secret = 'my&#45;secret'
+              callback = <span class="java&#45;quote">"$&#123;application.baseUrl&#125;/oauth/twitter/callback"</span>
+          &#125;
+      &#125;
+  &#125;</pre></div><p class="paragraph"/><blockquote class="note">
+You can specify whatever you'd like for a callback, but the format http://yourApp.url/oauth/providerName/callback will allow for the built-in oauth callback controller to add the accessToken details into your application's session as detailed in '4. Using the Plugin'.
+</blockquote><p class="paragraph"/><h2>Adding a SignatureType</h2><p class="paragraph"/>An Oauth2 SignatureType can be specified at the provider level, if your provider requires a specific method.<p class="paragraph"/>Valid <code>SignatureType</code>s are <code>SignatureType.QueryString</code> or <code>SignatureType.Header</code>:<p class="paragraph"/><div class="code"><pre>oauth &#123;
+      providers &#123;
+          twitter &#123;
+              api = TwitterApi
+              key = 'my&#45;key'
+              secret = 'my&#45;secret'
+              signatureType = SignatureType.QueryString
+          &#125;
+      &#125;
+  &#125;</pre></div><p class="paragraph"/><h2>Oauth provider scope</h2><p class="paragraph"/>Some providers (such as google) require a scope to be set for an oauth connection. The scope directive shown below will enable you to set this as necessary.<p class="paragraph"/><div class="code"><pre>oauth &#123;
+      providers &#123;
+          twitter &#123;
+              api = GoogleApi
+              key = 'my&#45;key'
+              secret = 'my&#45;secret'
+              scope = 'my&#45;scope'
+          &#125;
+      &#125;
+  &#125;</pre></div><p class="paragraph"/><h1>Global configuration</h1><p class="paragraph"/><h2>Turning request debugging on</h2><p class="paragraph"/>As of Scribe 1.2.3, debugging of HTTP traffic can be enabled to make troubleshooting issues easier. To enable this feature, add 'debug = true' in your global configuration:<p class="paragraph"/><div class="code"><pre>oauth &#123;
+      providers &#123;
+          twitter &#123;
+              api = TwitterApi
+              key = 'my&#45;key'
+              secret = 'my&#45;secret'
+          &#125;
+      &#125;
+      debug = <span class="java&#45;keyword">true</span>
+  &#125;</pre></div><p class="paragraph"/><h2>Adding connect and receive timeouts</h2><p class="paragraph"/>Sometimes you want to account for slower providers, or just fail more quickly if a provider isn't responding the way you would like it to. Connect and Receive timeouts can be configured for this purpose.<p class="paragraph"/>The default value for both of these parameters is 30000ms (30 seconds)<p class="paragraph"/><div class="code"><pre>oauth &#123;
+        providers &#123;
+            twitter &#123;
+                api = TwitterApi
+                key = 'myKey'
+                secret = 'mySecret'
+            &#125;
+        &#125;
+        connectTimeout = 5000
+        receiveTimeout = 5000
+    &#125;</pre></div><p class="paragraph"/>In the example above, we set both connect and receive timeouts to be 5000ms (5 seconds). This is also useful if you want to test your resilience to failure as part of a test suite.
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/2.%20Quick%20Start.html">&lt;&lt; <strong>2</strong><span>Quick Start</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/4.%20Using%20the%20Plugin.html"><strong>4</strong><span>Using the Plugin</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

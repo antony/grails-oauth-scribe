@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>2 Quick Start 2.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/1.%20Introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/2.%20Quick%20Start.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/3.%20Further%20Configuration.html"><strong>3</strong><span>Further Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/4.%20Using%20the%20Plugin.html"><strong>4</strong><span>Using the Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/5.%20Upgrading%20from%20grails-oauth.html"><strong>5</strong><span>Upgrading from grails-oauth</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/6.%20Troubleshooting.html"><strong>6</strong><span>Troubleshooting</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Provides oAuth integration for Grails, using the Scribe framework</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/1.%20Introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/3.%20Further%20Configuration.html"><strong>3</strong><span>Further Configuration</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>2 Quick Start - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Antony Jones</p>
+
+                    <p><strong>Version:</strong> 2.0</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h1 id="2. Quick Start">2 Quick Start</h1>
+<h1>Install the plugin</h1><p class="paragraph"/>Installing the plugin can be done in one of two ways:<p class="paragraph"/><h2>Installing the plugin using the Grails dependency DSL (Recommended)</h2><p class="paragraph"/>In <code>BuildConfig.groovy</code>, add the dependency to your 'plugins' section:
+<div class="code"><pre>plugins &#123;
+        &#8230;
+        compile ':oauth:1.0'
+        &#8230;
+    &#125;</pre></div><p class="paragraph"/><blockquote class="note">
+Note that the version (1.0 in the example above) should be change to refelect the version you would like to use.
+</blockquote><p class="paragraph"/><h2>Installing the plugin 'on-the-fly':</h2><p class="paragraph"/>Simply run the command <code>grails install-plugin oauth</code>. Note that this will install the latest version into the global scope, rather than the compile scope which is slightly cleaner, above.<p class="paragraph"/><h1>Configure the plugin</h1><p class="paragraph"/>Before the plugin can work, it requires at least one provider to be configured. The following is the minimal configuration you can get away with:<p class="paragraph"/>In <code>Config.groovy</code>
+<div class="code"><pre>oauth &#123;
+        providers &#123;
+            twitter &#123;
+                api = TwitterApi
+                key = 'my&#45;key'
+                secret = 'my&#45;secret'
+            &#125;
+        &#125;
+    &#125;</pre></div><p class="paragraph"/>In this example, <code>twitter</code> is the provider name you will use within your application. <code>api</code> is the scribe provider class which relates to the oauth service you are trying to connect to, and is a subclass of <code>OauthService</code>. It can be anything you want. <code>key</code> is the oauth-key you have been given by your provider and <code>secret</code> is the oauth-secret you have been given by your provider. You will need to import this into your <code>Config.groovy</code> file using the standard java <code>import</code> keyword.<p class="paragraph"/><blockquote class="note">
+Note that provider names are all lowercase - you don't necessarily need to lowercase them in your configuration, but when referencing them within the application, they have been lowercased for you. This means that 'MyProvider' becomes 'myprovider'.
+</blockquote><p class="paragraph"/><h2>Adding success and failure URIs</h2><p class="paragraph"/>When connecting to providers, the <code>successUri</code> and <code>failureUri</code> are the endpoints which the user will get redirected back to if connection to the provider succeeds, or fails, respectively.<p class="paragraph"/><div class="code"><pre>oauth &#123;
+        providers &#123;
+            twitter &#123;
+                api = TwitterApi
+                key = 'my&#45;key'
+                secret = 'my&#45;secret'
+                successUri = '/your/success/page'
+                failureUri = '/your/failure/page'
+            &#125;
+        &#125;
+    &#125;</pre></div><p class="paragraph"/>At this stage, you can safely use the plugin with no further work!<p class="paragraph"/><h1>Providers which work 'out-of-the-box'</h1><p class="paragraph"/>Scribe supports a large providers out of the box, using one of these services is as easy as specifying the provider's class as your <code>api</code> directive in the configuration above.<p class="paragraph"/>For a full list of providers, see <a href="https://github.com/fernandezpablo85/scribe-java/tree/master/src/main/java/org/scribe/builder/api" target="blank">OAuth Scribe&#39;s api package</a><p class="paragraph"/><h2>Implementing your own provider</h2><p class="paragraph"/>To implement your own provider, simply subclass either <code>DefaultApi10a</code> or <code>DefaultApi20</code> depending on the implementation of oauth your provider supports, and provide your implementation class to the configuration's <code>api</code> parameter.
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/1.%20Introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/3.%20Further%20Configuration.html"><strong>3</strong><span>Further Configuration</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

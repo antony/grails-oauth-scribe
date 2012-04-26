@@ -1,0 +1,5 @@
+DefaultPackage
+uk.co.desirableobjects.oauth.scribe
+uk.co.desirableobjects.oauth.scribe.exception
+uk.co.desirableobjects.oauth.scribe.test
+uk.co.desirableobjects.oauth.scribe.util

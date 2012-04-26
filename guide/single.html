@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+    <head>
+        <title>Oauth Scribe Plugin 2.0</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
+        <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
+    <script type="text/javascript">
+function addJsClass(el) {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+    </head>
+
+    <body class="body" onload="addJsClass();">
+        <div id="navigation">
+            <ul>
+                <li>
+                    <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                        <a href="../guide/index.html" class="button">Table of contents</a>
+                        <div id="nav-summary-childs" style="display:none;">
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#quickStart"><strong>2</strong><span>Quick Start</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#furtherConfiguration"><strong>3</strong><span>Further Configuration</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#usingThePlugin"><strong>4</strong><span>Using the Plugin</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#upgradingFromGrails-oauth"><strong>5</strong><span>Upgrading from grails-oauth</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#troubleshooting"><strong>6</strong><span>Troubleshooting</span></a></div>
+                            
+                        </div>
+                    </div>
+                </li>
+                <li class="separator selected">
+                    <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+                </li>
+            </ul>
+        </div>
+        <div id="header">
+            <div class="images clearfix">
+                
+                
+            </div>
+            <p>Provides oAuth integration for Grails, using the Scribe framework</p>
+        </div>
+
+
+        <table id="colset" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td id="col1">
+                    <div id="main" class="corner-all">
+
+                        <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                        <div class="project">
+                            <h1>Oauth Scribe Plugin - Reference Documentation</h1>
+                            <p><strong>Authors:</strong> Antony Jones</p>
+                            <p><strong>Version:</strong> 2.0</p>
+                            
+                        </div>
+
+                        
+                        <div id="table-of-content">
+                            <h2>Table of Contents</h2>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#quickStart"><strong>2</strong><span>Quick Start</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#furtherConfiguration"><strong>3</strong><span>Further Configuration</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#usingThePlugin"><strong>4</strong><span>Using the Plugin</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#upgradingFromGrails-oauth"><strong>5</strong><span>Upgrading from grails-oauth</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#troubleshooting"><strong>6</strong><span>Troubleshooting</span></a></div>
+                            
+                            <div style="clear:both" ></div>
+                        </div>
+                        
+                        
+<a name="1. Introduction"><!-- Legacy link --></a>
+<h1 id="introduction">1 Introduction</h1>
+The Grails Oauth plugin enables you to consume services from third-party providers which are protected by oauth based security, in your own applications.<p class="paragraph"/><h1>About the plugin</h1>
+<ul class="star">
+<li>Author:</li>
+<ul class="star">
+<li>Antony Jones, Desirable Objects Ltd</li>
+</ul>
+<li>Contributors:</li>
+<ul class="star">
+<li>Anthony Campbell</li>
+<li>Peter Ledbrook, VMWare Inc</li>
+<li>Richard Spence</li>
+</ul>
+<li>Thanks:</li>
+<ul class="star">
+<li>Pablo Fernandez, Globant</li>
+<li>Damien Hou, Google Inc</li>
+</ul></ul><p class="paragraph"/><h1>Further Reading</h1><p class="paragraph"/>This plugin makes heavy use of the <a href="https://github.com/fernandezpablo85/scribe-java" target="blank">OAuth Scribe</a> library, by Pablo Fernandez. Please refer to scribe's documentation for detailed information on creating your own custom provider implementation.<p class="paragraph"/><h1>Licensing</h1><p class="paragraph"/>This plugin is released under the GPLv2, however should this not suit your needs, please get in touch.
+
+<a name="2. Quick Start"><!-- Legacy link --></a>
+<h1 id="quickStart">2 Quick Start</h1>
+<h1>Install the plugin</h1><p class="paragraph"/>Installing the plugin can be done in one of two ways:<p class="paragraph"/><h2>Installing the plugin using the Grails dependency DSL (Recommended)</h2><p class="paragraph"/>In <code>BuildConfig.groovy</code>, add the dependency to your 'plugins' section:
+<div class="code"><pre>plugins &#123;
+        &#8230;
+        compile ':oauth:1.0'
+        &#8230;
+    &#125;</pre></div><p class="paragraph"/><blockquote class="note">
+Note that the version (1.0 in the example above) should be change to refelect the version you would like to use.
+</blockquote><p class="paragraph"/><h2>Installing the plugin 'on-the-fly':</h2><p class="paragraph"/>Simply run the command <code>grails install-plugin oauth</code>. Note that this will install the latest version into the global scope, rather than the compile scope which is slightly cleaner, above.<p class="paragraph"/><h1>Configure the plugin</h1><p class="paragraph"/>Before the plugin can work, it requires at least one provider to be configured. The following is the minimal configuration you can get away with:<p class="paragraph"/>In <code>Config.groovy</code>
+<div class="code"><pre>oauth &#123;
+        providers &#123;
+            twitter &#123;
+                api = TwitterApi
+                key = 'my&#45;key'
+                secret = 'my&#45;secret'
+            &#125;
+        &#125;
+    &#125;</pre></div><p class="paragraph"/>In this example, <code>twitter</code> is the provider name you will use within your application. <code>api</code> is the scribe provider class which relates to the oauth service you are trying to connect to, and is a subclass of <code>OauthService</code>. It can be anything you want. <code>key</code> is the oauth-key you have been given by your provider and <code>secret</code> is the oauth-secret you have been given by your provider. You will need to import this into your <code>Config.groovy</code> file using the standard java <code>import</code> keyword.<p class="paragraph"/><blockquote class="note">
+Note that provider names are all lowercase - you don't necessarily need to lowercase them in your configuration, but when referencing them within the application, they have been lowercased for you. This means that 'MyProvider' becomes 'myprovider'.
+</blockquote><p class="paragraph"/><h2>Adding success and failure URIs</h2><p class="paragraph"/>When connecting to providers, the <code>successUri</code> and <code>failureUri</code> are the endpoints which the user will get redirected back to if connection to the provider succeeds, or fails, respectively.<p class="paragraph"/><div class="code"><pre>oauth &#123;
+        providers &#123;
+            twitter &#123;
+                api = TwitterApi
+                key = 'my&#45;key'
+                secret = 'my&#45;secret'
+                successUri = '/your/success/page'
+                failureUri = '/your/failure/page'
+            &#125;
+        &#125;
+    &#125;</pre></div><p class="paragraph"/>At this stage, you can safely use the plugin with no further work!<p class="paragraph"/><h1>Providers which work 'out-of-the-box'</h1><p class="paragraph"/>Scribe supports a large providers out of the box, using one of these services is as easy as specifying the provider's class as your <code>api</code> directive in the configuration above.<p class="paragraph"/>For a full list of providers, see <a href="https://github.com/fernandezpablo85/scribe-java/tree/master/src/main/java/org/scribe/builder/api" target="blank">OAuth Scribe&#39;s api package</a><p class="paragraph"/><h2>Implementing your own provider</h2><p class="paragraph"/>To implement your own provider, simply subclass either <code>DefaultApi10a</code> or <code>DefaultApi20</code> depending on the implementation of oauth your provider supports, and provide your implementation class to the configuration's <code>api</code> parameter.
+
+<a name="3. Further Configuration"><!-- Legacy link --></a>
+<h1 id="furtherConfiguration">3 Further Configuration</h1>
+Provided that you have read the Quick Start guide, you should have some configuration which looks a little like this:<p class="paragraph"/><div class="code"><pre>oauth &#123;
+        providers &#123;
+            twitter &#123;
+                api = TwitterApi
+                key = 'my&#45;key'
+                secret = 'my&#45;secret'
+            &#125;
+        &#125;
+    &#125;</pre></div><p class="paragraph"/>You're now in a good position to configure some further elements of the plugin if you need to.<p class="paragraph"/><h1>Provider specific configuration</h1><p class="paragraph"/><h2>Adding a second provider</h2><p class="paragraph"/>Adding a second provider is as easy as adding your provider-specific configuration to the providers block:<p class="paragraph"/><div class="code"><pre>oauth &#123;
+        providers &#123;
+            twitter &#123;
+                api = TwitterApi
+                key = 'my&#45;key'
+                secret = 'my&#45;secret'
+            &#125;
+            facebook &#123;
+                api = FacebookApi
+                key = 'other&#45;key'
+                secret = 'other&#45;secret'
+            &#125;
+        &#125;
+    &#125;</pre></div><p class="paragraph"/><h2>Adding a callback URI</h2><p class="paragraph"/>Some providers allow for a callback URI to be specified on the providers side. If you would prefer to pass the callback as you make the authentication request, you can do so by configuring the callback parameter in the configuration.<p class="paragraph"/>A callback uri can be specified at the provider level:<p class="paragraph"/><div class="code"><pre>oauth &#123;
+      providers &#123;
+          twitter &#123;
+              api = TwitterApi
+              key = 'my&#45;key'
+              secret = 'my&#45;secret'
+              callback = <span class="java&#45;quote">"$&#123;application.baseUrl&#125;/oauth/twitter/callback"</span>
+          &#125;
+      &#125;
+  &#125;</pre></div><p class="paragraph"/><blockquote class="note">
+You can specify whatever you'd like for a callback, but the format http://yourApp.url/oauth/providerName/callback will allow for the built-in oauth callback controller to add the accessToken details into your application's session as detailed in '4. Using the Plugin'.
+</blockquote><p class="paragraph"/><h2>Adding a SignatureType</h2><p class="paragraph"/>An Oauth2 SignatureType can be specified at the provider level, if your provider requires a specific method.<p class="paragraph"/>Valid <code>SignatureType</code>s are <code>SignatureType.QueryString</code> or <code>SignatureType.Header</code>:<p class="paragraph"/><div class="code"><pre>oauth &#123;
+      providers &#123;
+          twitter &#123;
+              api = TwitterApi
+              key = 'my&#45;key'
+              secret = 'my&#45;secret'
+              signatureType = SignatureType.QueryString
+          &#125;
+      &#125;
+  &#125;</pre></div><p class="paragraph"/><h2>Oauth provider scope</h2><p class="paragraph"/>Some providers (such as google) require a scope to be set for an oauth connection. The scope directive shown below will enable you to set this as necessary.<p class="paragraph"/><div class="code"><pre>oauth &#123;
+      providers &#123;
+          twitter &#123;
+              api = GoogleApi
+              key = 'my&#45;key'
+              secret = 'my&#45;secret'
+              scope = 'my&#45;scope'
+          &#125;
+      &#125;
+  &#125;</pre></div><p class="paragraph"/><h1>Global configuration</h1><p class="paragraph"/><h2>Turning request debugging on</h2><p class="paragraph"/>As of Scribe 1.2.3, debugging of HTTP traffic can be enabled to make troubleshooting issues easier. To enable this feature, add 'debug = true' in your global configuration:<p class="paragraph"/><div class="code"><pre>oauth &#123;
+      providers &#123;
+          twitter &#123;
+              api = TwitterApi
+              key = 'my&#45;key'
+              secret = 'my&#45;secret'
+          &#125;
+      &#125;
+      debug = <span class="java&#45;keyword">true</span>
+  &#125;</pre></div><p class="paragraph"/><h2>Adding connect and receive timeouts</h2><p class="paragraph"/>Sometimes you want to account for slower providers, or just fail more quickly if a provider isn't responding the way you would like it to. Connect and Receive timeouts can be configured for this purpose.<p class="paragraph"/>The default value for both of these parameters is 30000ms (30 seconds)<p class="paragraph"/><div class="code"><pre>oauth &#123;
+        providers &#123;
+            twitter &#123;
+                api = TwitterApi
+                key = 'myKey'
+                secret = 'mySecret'
+            &#125;
+        &#125;
+        connectTimeout = 5000
+        receiveTimeout = 5000
+    &#125;</pre></div><p class="paragraph"/>In the example above, we set both connect and receive timeouts to be 5000ms (5 seconds). This is also useful if you want to test your resilience to failure as part of a test suite.
+
+<a name="4. Using the Plugin"><!-- Legacy link --></a>
+<h1 id="usingThePlugin">4 Using the Plugin</h1>
+Using the oauth plugin in your application requires a few simple steps.<p class="paragraph"/><h1>Using the Tag Library</h1><p class="paragraph"/>To render a user-clickable link in your application which will direct them to a provider's authentication page, use the <code>connect</code> tag:<p class="paragraph"/><div class="code"><pre>&#60;oauth:connect provider=<span class="java&#45;quote">"twitter"</span>&#62;Connect to Twitter&#60;/oauth:connect&#62;</pre></div><p class="paragraph"/>The provider attribute is required and relates to one of the providers specified in your configuration.<p class="paragraph"/>This tag will work automatically on its own can also accept any standard parameters that the <code>&#60;g:link /&#62;</code> tag can accept, for example, to set a css id on the generated link:<p class="paragraph"/><div class="code"><pre>&#60;oauth:connect provider=<span class="java&#45;quote">"facebook"</span> id=<span class="java&#45;quote">"facebook&#45;connect&#45;link"</span>&#62;Connect to Facebook&#60;/oauth:connect&#62;</pre></div><p class="paragraph"/><h1>Receiving the oauth AccessToken</h1><p class="paragraph"/>After a user clicks your link, they will be sent back to the successUrl you specified in your configuration (or failureUrl if something went wrong). At this point there will be a session variable called <code>providerName:oasAccessToken</code> (where providerName is one of your configured provider names) which contains an <code>org.scribe.model.Token</code> instance, which is your Access Token.<p class="paragraph"/>It is recommended not to tie yourself to the name of the session key listed in the previous paragraph. To avoid this situation, the method <code>OauthService.findSessionKeyForAccessToken</code> which takes your provider name as its only parameter should be used to determine the session key, as follows:<p class="paragraph"/><div class="code"><pre>class MyClass &#123;
+    OauthService oauthService // or <span class="java&#45;keyword">new</span> OauthService() would work <span class="java&#45;keyword">if</span> you're not in a spring&#45;managed class.<p class="paragraph"/>    Token getToken() &#123;<p class="paragraph"/>        <span class="java&#45;object">String</span> sessionKey = oauthService.findSessionKeyForAccessToken('twitter')
+        <span class="java&#45;keyword">return</span> session&#91;sessionKey&#93;<p class="paragraph"/>    &#125;
+&#125;</pre></div><p class="paragraph"/>would give you the access token for the 'twitter' provider which you can then use to make requests, as below.<p class="paragraph"/><h1>Requesting a resource using your AccessToken</h1><p class="paragraph"/>Provided your access token is now present, you now can request oauth protected resources from your third-party provider!<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> uk.co.desirableobjects.oauth.scribe.OauthService<p class="paragraph"/>class MyService &#123;
+    OauthService oauthService<p class="paragraph"/>    def myMethod() &#123;
+        Token twitterAccessToken = session&#91;oauthService.findSessionKeyForAccessToken('twitter')&#93;
+        Token linkedInAccessToken = session&#91;oauthService.findSessionKeyForAccessToken('linkedin')&#93;<p class="paragraph"/>        oauthService.getTwitterResource(twitterAccessToken, 'http://api.yourprovider.com/users/list')
+        oauthService.postLinkedInResource(linkedInAccessToken, 'http://api.yourprovider.com/users/list')
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The convention used for accessing resources is <code>OauthService.&#60;method&#62;&#60;provider&#62;Resource(accessToken, url)</code>.<p class="paragraph"/>In the above example:<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">component</strong></th><th><strong class="bold">description</strong></th></tr><tr class="table-odd"><td><strong class="bold">method</strong></td><td>is the HTTP method used, one of put, post, get, delete, head, or options.</td></tr><tr class="table-even"><td><strong class="bold">url</strong></td><td>is the url of the oauth-protected resource you are trying to access.</td></tr><tr class="table-odd"><td><strong class="bold">provider</strong></td><td>is the provider name configured in your oauth configuration.</td></tr><tr class="table-even"><td><strong class="bold">accessToken</strong></td><td>is the access token you were given (via the session) when the user authenticated themselves with the provider.</td></tr></table><p class="paragraph"/>
+
+
+<a name="5. Upgrading from grails-oauth"><!-- Legacy link --></a>
+<h1 id="upgradingFromGrails-oauth">5 Upgrading from grails-oauth</h1>
+grails-oauth vesion 2.x is a ground-up rewrite of the previous plugin (&#60; 1.x), with a number of small differences in its set-up.<p class="paragraph"/>This quick guide will attempt to make the transition as seamless as possible.<p class="paragraph"/><h2>Configuration</h2><p class="paragraph"/>The configuration block's structure remains mainly the same, with the important changes documented below<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Old Configuration Directive</strong></th><th><strong class="bold">New Configuration Directive</strong></th></tr><tr class="table-odd"><td>requestTokenUrl</td><td>Replaced with 'api' directive, see 3. Further Configuration</td></tr><tr class="table-even"><td>accessTokenUrl</td><td>Replaced with 'api' directive, see 3. Further Configuration</td></tr><tr class="table-odd"><td>authUrl</td><td>Replaced with 'api' directive, see 3. Further Configuration</td></tr><tr class="table-even"><td>consumer.key</td><td>key</td></tr><tr class="table-odd"><td>consumer.secret</td><td>secret</td></tr></table><p class="paragraph"/><blockquote class="note">
+The plugin does not currently support multiple consumers, it is recommended to set up multiple providers with different names if you need this functionality.
+</blockquote><p class="paragraph"/><h2>In the view layer (GSP)</h2><p class="paragraph"/>The oauth link tag has become much more simplified:<p class="paragraph"/><div class="code"><pre>&#60;g:oauthLink consumer='myConsumer'
+             returnTo=<span class="java&#45;quote">"&#91;controller: 'myController', action: 'oauthComplete'&#93;"</span>&#62;Authorize&#60;/g:oauthLink&#62;</pre></div><p class="paragraph"/>becomes simply<p class="paragraph"/><div class="code"><pre>&#60;oauth:connect provider=<span class="java&#45;quote">"myConsumer"</span>&#62;Authorize&#60;/oauth:connect&#62;</pre></div><p class="paragraph"/><blockquote class="note">
+The 'returnTo' directive above has been moved into your configuration as 'successUri' and 'failureUri'. See 3. Further Configuration for further details.
+</blockquote><p class="paragraph"/><h2>Accessing oauth protected resources</h2><p class="paragraph"/>Accessing resources is now done via convention rather than configuration, so the following block of code<p class="paragraph"/><div class="code"><pre>def response = oauthService.accessResource(url: 'http://api.url', consumer: 'twitter',
+    token:&#91;key: 'accesskey', secret: 'accesssecret'&#93;, method: 'POST')</pre></div><p class="paragraph"/>can be implemented as<p class="paragraph"/><div class="code"><pre>def response = oauthService.postTwitterResource(twitterAccessToken, 'http://api.url')</pre></div><p class="paragraph"/>where 'Twitter' is the provider name, twitterAccessToken is an instance of <code>org.scribe.model.Token</code> and the second parameter is the url of the oauth protected resource you are trying to access.
+
+
+<a name="6. Troubleshooting"><!-- Legacy link --></a>
+<h1 id="troubleshooting">6 Troubleshooting</h1>
+<h2>Debugging requests</h2><p class="paragraph"/>As shown in the configuration section, it is possible to provide the debug flag in your global oauth configuration, which will log all http traffic (request and response) to the console.<p class="paragraph"/><h2>When the callback is hit, my requestToken is no longer in the session!</h2><p class="paragraph"/>Because of the way sessions work in a JEE container, if your app is running at say <code>http://localhost:8080/</code> and your callback url is something like <code>http://staging.your-app.cloudfoundry.com/oauth/twitter/callback</code> you will get a different session when your callback is hit! Make sure that your browser's URL bar shows the same domain and port that your callback points to, otherwise you won't be seeing the same session.
+
+                    </div>
+                </td>
+                <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+            </tr>
+        </table>
+
+        <div id="footer">
+            
+            
+        </div>
+
+
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+    </body>
+</html>
