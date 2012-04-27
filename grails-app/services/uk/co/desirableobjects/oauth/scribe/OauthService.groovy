@@ -17,6 +17,8 @@ import uk.co.desirableobjects.oauth.scribe.util.DynamicMethods
 
 class OauthService {
 
+    static def transactional = false
+
     private static final int THIRTY_SECONDS = 30000
     Map<String, OauthProvider> services = [:]
     OauthResourceService oauthResourceService

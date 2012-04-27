@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 class OauthResourceService {
 
-    static transactional = true
+    static def transactional = false
 
     Response accessResource(OAuthService service, Token accessToken, Verb verb, String url, int connectTimeout, int receiveTimeout) {
 
