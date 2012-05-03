@@ -7,8 +7,8 @@ import org.scribe.oauth.OAuthService
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 import spock.lang.Shared
+import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
 
-//@Mixin(GMockAddon)
 @TestFor(OauthController)
 class OauthControllerSpec extends Specification {
 
@@ -137,7 +137,24 @@ class OauthControllerSpec extends Specification {
 
     }
 
-    def 'Default success and failure URLs are sane'() {
+    def 'Oauth callback is hit but there is no request token in the session (bad callback domain)'() {
+
+        given:
+            controller.params.provider = PROVIDER_NAME
+            controller.params.oauth_verifier = 'oauth-verifier'
+            controller.params.code = 'verifier-key'
+
+        when:
+            controller.callback()
+
+        then:
+            controller.oauthService.findSessionKeyForRequestToken(PROVIDER_NAME) >> { return REQUEST_TOKEN_SESSION_KEY }
+            controller.oauthService.findProviderConfiguration(PROVIDER_NAME) >> { return provider }
+            provider.service.version >> { return '2.0' }
+
+        and:
+            def exception = thrown MissingRequestTokenException
+            exception.message == "We couldn't find a request token for twitter in the session. A common cause of this is that you have been given a new session by the servlet container because your callback domain is different to the domain you are authenticating from. Check that the domain name in the URL bar of your browser matches the domain name of your callback URL"
 
     }
 

@@ -10,6 +10,7 @@ import org.scribe.builder.api.TwitterApi
 import spock.lang.Unroll
 
 import org.scribe.builder.ServiceBuilder
+import org.codehaus.groovy.grails.web.servlet.mvc.exceptions.InvalidUriException
 
 class OauthServiceSpec extends UnitSpec {
 
@@ -304,7 +305,6 @@ class OauthServiceSpec extends UnitSpec {
 
             mockConfig '''
                 import org.scribe.builder.api.TwitterApi
-                import org.scribe.model.SignatureType
 
                 oauth {
                     providers {
@@ -336,7 +336,6 @@ class OauthServiceSpec extends UnitSpec {
 
             mockConfig '''
                 import org.scribe.builder.api.TwitterApi
-                import org.scribe.model.SignatureType
 
                 oauth {
                     providers {
@@ -368,7 +367,6 @@ class OauthServiceSpec extends UnitSpec {
         given:
             mockConfig '''
                 import org.scribe.builder.api.TwitterApi
-                import org.scribe.model.SignatureType
 
                 oauth {
                     providers {
@@ -398,7 +396,6 @@ class OauthServiceSpec extends UnitSpec {
         given:
 
             mockConfig """
-                import org.scribe.model.SignatureType
 
                 oauth {
                     providers {

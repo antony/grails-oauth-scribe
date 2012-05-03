@@ -3,8 +3,10 @@
 .classpath
 .project
 settings.xml
+.settings
 *.iml
 *.iws
+*.ipr
 plugin.xml
 *.zip
 target

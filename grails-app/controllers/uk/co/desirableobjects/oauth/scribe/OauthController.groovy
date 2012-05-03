@@ -3,6 +3,7 @@ package uk.co.desirableobjects.oauth.scribe
 import org.scribe.model.Verifier
 import org.scribe.model.Token
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
+import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
 
 class OauthController {
 
@@ -22,6 +23,11 @@ class OauthController {
         }
 
         Token requestToken = (Token) session[oauthService.findSessionKeyForRequestToken(providerName)]
+
+        if (!requestToken) {
+            throw new MissingRequestTokenException(providerName)
+        }
+
         Token accessToken = oauthService.getAccessToken(providerName, requestToken, verifier)
 
         session[oauthService.findSessionKeyForAccessToken(providerName)] = accessToken
@@ -32,11 +38,8 @@ class OauthController {
     }
 
     private Verifier extractVerifier(OauthProvider provider, GrailsParameterMap params) {
-        
-        String verifierKey = 'oauth_verifier'
-        if (SupportedOauthVersion.TWO == provider.oauthVersion) {
-            verifierKey = 'code'
-        }
+
+        String verifierKey = determineVerifierKey(provider)
 
         if (!params[verifierKey]) {
              log.error("Cannot authenticate with oauth: Could not find oauth verifier in ${params}.")
@@ -45,6 +48,12 @@ class OauthController {
 
         String verification = params[verifierKey]
         return new Verifier(verification)
+
+    }
+
+    private String determineVerifierKey(OauthProvider provider) {
+
+        return SupportedOauthVersion.TWO == provider.oauthVersion ? 'code' : 'oauth_verifier'
 
     }
 
