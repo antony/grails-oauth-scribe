@@ -33,7 +33,7 @@ class OauthService {
     String findSessionKeyForAccessToken(String providerName) {
         return "${providerName}:oasAccessToken"
     }
-    
+
     OauthService() {
 
         ConfigObject conf = fetchConfig()
@@ -62,7 +62,7 @@ class OauthService {
     private void buildService(ConfigObject conf) {
 
         boolean debug = (conf.debug) ?: false
-        
+
         conf.providers.each { configuration ->
 
                 verifyConfiguration(configuration)
@@ -149,7 +149,7 @@ class OauthService {
     def methodMissing(String name, args) {
 
        if( name ==~ /^.*RequestToken/) {
-           
+
            String provider = DynamicMethods.extractKeyword(name, /^get(.*)RequestToken/)
            return this.getRequestToken(provider)
 
@@ -176,21 +176,41 @@ class OauthService {
               String serviceName = (String) m[0][2].toString().toLowerCase()
 
               if (Verb.values()*.name().find { it == verb.toUpperCase() } ) {
-                  return this.accessResource(serviceName, args[0] as Token, verb, args[1] as String)
+                  return this.accessResource(serviceName, args[0] as Token, verb, args[1] as String, args.length>2?args[2] as Map:null)
+
               }
 
        }
 
-       throw new MissingMethodException(name, this.class, args)
+        if( name ==~ /^(get|put|post|delete|options|head).*ResourceWithPayload/) {
+
+            def m = name =~ /^(get|put|post|delete|options|head)(.*)ResourceWithPayload/
+            String verb = (String) m[0][1]
+            String serviceName = (String) m[0][2].toString().toLowerCase()
+
+            if (Verb.values()*.name().find { it == verb.toUpperCase() } ) {
+                return this.accessResource(serviceName, args[0] as Token, verb, args[1] as String, args[2] as String)
+            }
+
+        }
+        throw new MissingMethodException(name, this.class, args)
 
     }
 
-    Response accessResource(String serviceName, Token accessToken, String verbName, String url) {
+    Response accessResource(String serviceName, Token accessToken, String verbName, String url, Map body) {
 
         Verb verb = Verb.valueOf(verbName.toUpperCase())
-        return oauthResourceService.accessResource(findService(serviceName), accessToken, verb, url, connectTimeout, receiveTimeout)
-        
+        return oauthResourceService.accessResource(findService(serviceName), accessToken, verb, url, body, connectTimeout, receiveTimeout)
+
     }
+
+    Response accessResource(String serviceName, Token accessToken, String verbName, String url, String payload) {
+
+        Verb verb = Verb.valueOf(verbName.toUpperCase())
+        return oauthResourceService.accessResource(findService(serviceName), accessToken, verb, url, payload, connectTimeout, receiveTimeout)
+
+    }
+
 
     protected OAuthService findService(String providerName) {
 
