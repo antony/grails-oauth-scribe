@@ -11,11 +11,14 @@ class OauthResourceService {
 
     static def transactional = false
 
-    Response accessResource(OAuthService service, Token accessToken, Verb verb, String url, int connectTimeout, int receiveTimeout) {
+    Response accessResource(OAuthService service, Token accessToken, Verb verb, String url, Map body, int connectTimeout, int receiveTimeout) {
 
         OAuthRequest oAuthRequest = new OAuthRequest(verb, url)
         oAuthRequest.setConnectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
         oAuthRequest.setReadTimeout(receiveTimeout, TimeUnit.MILLISECONDS)
+        body.each {k, v->
+            oAuthRequest.addBodyParameter(k, v)
+        }
         service.signRequest(accessToken, oAuthRequest)
         return oAuthRequest.send()
 
