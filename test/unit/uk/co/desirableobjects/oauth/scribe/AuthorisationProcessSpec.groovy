@@ -108,8 +108,7 @@ class AuthorisationProcessSpec extends UnitSpec {
             and:
 
                 oaService.oauthResourceService = mock(OauthResourceService)
-                oaService.oauthResourceService.accessResource(oaService.services['twitter'].service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, 30000, 30000).returns(oaResponse)
-
+                oaService.oauthResourceService.accessResource(oaService.services['twitter'].service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, null, 30000, 30000).returns(oaResponse)
             when:
 
                 String body = null
@@ -120,6 +119,51 @@ class AuthorisationProcessSpec extends UnitSpec {
                 simulate {
 
                     def actualResponse = oaService."${verb.name().toLowerCase()}TwitterResource"(accessToken, DUMMY_OAUTH_RESOURCE_URI)
+                    body = actualResponse.body
+                    code = actualResponse.code
+
+                }
+
+            then:
+
+                code == HttpStatus.OK.value()
+                body == expectedResponse
+
+            where:
+
+                verb << Verb.values()
+
+
+        }
+
+        @Unroll
+        def 'make a #verb request using the authorised connection and an xml payload'() {
+
+            given:
+
+                oaService.services['twitter'].service = mock(OAuthService)
+
+            and:
+
+                String expectedResponse = 'Hello There.'
+                Response oaResponse = mock(Response)
+                oaResponse.getBody().returns(expectedResponse)
+                oaResponse.getCode().returns(HttpStatus.OK.value())
+
+            and:
+
+                oaService.oauthResourceService = mock(OauthResourceService)
+                oaService.oauthResourceService.accessResource(oaService.services['twitter'].service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, '<data>mock data</data>', 30000, 30000).returns(oaResponse)
+            when:
+
+                String body = null
+                int code = -1
+
+            and:
+
+                simulate {
+
+                    def actualResponse = oaService."${verb.name().toLowerCase()}TwitterResourceWithPayload"(accessToken, DUMMY_OAUTH_RESOURCE_URI, '<data>mock data</data>')
                     body = actualResponse.body
                     code = actualResponse.code
 
