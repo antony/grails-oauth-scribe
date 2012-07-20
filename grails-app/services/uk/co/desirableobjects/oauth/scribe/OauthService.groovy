@@ -189,7 +189,8 @@ class OauthService {
             String serviceName = (String) m[0][2].toString().toLowerCase()
 
             if (Verb.values()*.name().find { it == verb.toUpperCase() } ) {
-                return this.accessResource(serviceName, args[0] as Token, verb, args[1] as String, args[2] as String)
+                return this.accessResource(serviceName, args[0] as Token, verb, args[1] as String, args[2] as String,
+                        args[3] as String)
             }
 
         }
@@ -204,10 +205,10 @@ class OauthService {
 
     }
 
-    Response accessResource(String serviceName, Token accessToken, String verbName, String url, String payload) {
+    Response accessResource(String serviceName, Token accessToken, String verbName, String url, String payload, String contentType) {
 
         Verb verb = Verb.valueOf(verbName.toUpperCase())
-        return oauthResourceService.accessResource(findService(serviceName), accessToken, verb, url, payload, connectTimeout, receiveTimeout)
+        return oauthResourceService.accessResource(findService(serviceName), accessToken, verb, url, payload, contentType, connectTimeout, receiveTimeout)
 
     }
 

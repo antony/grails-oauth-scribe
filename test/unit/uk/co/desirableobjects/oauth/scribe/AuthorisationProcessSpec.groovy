@@ -153,7 +153,7 @@ class AuthorisationProcessSpec extends UnitSpec {
             and:
 
                 oaService.oauthResourceService = mock(OauthResourceService)
-                oaService.oauthResourceService.accessResource(oaService.services['twitter'].service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, '<data>mock data</data>', 30000, 30000).returns(oaResponse)
+                oaService.oauthResourceService.accessResource(oaService.services['twitter'].service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, '<data>mock data</data>', 'application/xml', 30000, 30000).returns(oaResponse)
             when:
 
                 String body = null
@@ -163,7 +163,7 @@ class AuthorisationProcessSpec extends UnitSpec {
 
                 simulate {
 
-                    def actualResponse = oaService."${verb.name().toLowerCase()}TwitterResourceWithPayload"(accessToken, DUMMY_OAUTH_RESOURCE_URI, '<data>mock data</data>')
+                    def actualResponse = oaService."${verb.name().toLowerCase()}TwitterResourceWithPayload"(accessToken, DUMMY_OAUTH_RESOURCE_URI, '<data>mock data</data>', 'application/xml')
                     body = actualResponse.body
                     code = actualResponse.code
 

@@ -27,13 +27,13 @@ class OauthResourceService {
 
     }
 
-    Response accessResource(OAuthService service, Token accessToken, Verb verb, String url, String xmlPayload, int connectTimeout, int receiveTimeout) {
+    Response accessResource(OAuthService service, Token accessToken, Verb verb, String url, String payload, String contentType, int connectTimeout, int receiveTimeout) {
         OAuthRequest oAuthRequest = new OAuthRequest(verb, url)
         oAuthRequest.setConnectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
         oAuthRequest.setReadTimeout(receiveTimeout, TimeUnit.MILLISECONDS)
-        oAuthRequest.addPayload(xmlPayload)
-        oAuthRequest.addHeader("Content-Length", Integer.toString(xmlPayload.length()))
-        oAuthRequest.addHeader("Content-Type", "text/xml")
+        oAuthRequest.addPayload(payload)
+        oAuthRequest.addHeader("Content-Length", Integer.toString(payload.length()))
+        oAuthRequest.addHeader("Content-Type", contentType)
         service.signRequest(accessToken, oAuthRequest)
         return oAuthRequest.send()
 
