@@ -41,6 +41,14 @@ class AuthorisationProcessSpec extends UnitSpec {
                         }
                     """
                     oaService = new OauthService()
+                    oaService.grailsApplication = [config: [
+                            oauth: [
+                                providers: [
+                                    twitter: [
+                                        api: org.scribe.builder.api.TwitterApi,
+                                        key: "myKey",
+                                        secret: "mySecret" ] ]]]]
+                    oaService.afterPropertiesSet()
 
                     oaService.services.twitter.service = mock(OAuthService)
                     oaService.services.twitter.service.getRequestToken().returns(new Token('a', 'b', 'c'))
