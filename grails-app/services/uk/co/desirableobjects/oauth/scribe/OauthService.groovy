@@ -14,14 +14,16 @@ import org.scribe.model.Response
 import org.scribe.model.SignatureType
 import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
 import uk.co.desirableobjects.oauth.scribe.util.DynamicMethods
+import org.springframework.beans.factory.InitializingBean
 
-class OauthService {
+class OauthService implements InitializingBean {
 
-    static def transactional = false
+    static transactional = false
 
     private static final int THIRTY_SECONDS = 30000
     Map<String, OauthProvider> services = [:]
     OauthResourceService oauthResourceService
+    def grailsApplication
 
     private int connectTimeout
     private int receiveTimeout
@@ -34,9 +36,9 @@ class OauthService {
         return "${providerName}:oasAccessToken"
     }
 
-    OauthService() {
+    void afterPropertiesSet() {
 
-        ConfigObject conf = fetchConfig()
+        Map conf = fetchConfig()
 
         try {
 
@@ -52,14 +54,14 @@ class OauthService {
 
     }
 
-    private void configureTimeouts(ConfigObject conf) {
+    private void configureTimeouts(Map conf) {
 
         connectTimeout = conf.containsKey('connectTimeout') ? conf.connectTimeout : THIRTY_SECONDS
         receiveTimeout = conf.containsKey('receiveTimeout') ? conf.receiveTimeout : THIRTY_SECONDS
 
     }
 
-    private void buildService(ConfigObject conf) {
+    private void buildService(Map conf) {
 
         boolean debug = (conf.debug) ?: false
 
@@ -117,13 +119,12 @@ class OauthService {
 
     }
 
-    private ConfigObject fetchConfig() {
+    private Map fetchConfig() {
 
-        if (!CH.config?.oauth) {
+        Map conf = grailsApplication.config.oauth
+        if (!conf) {
             throw new IllegalStateException('No oauth configuration found. Please configure the oauth scribe plugin')
         }
-
-        ConfigObject conf = CH.config.oauth
 
         return conf
     }

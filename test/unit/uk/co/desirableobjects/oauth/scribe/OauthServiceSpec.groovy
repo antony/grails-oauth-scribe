@@ -7,48 +7,54 @@ import org.scribe.oauth.OAuthService
 import org.scribe.model.OAuthConfig
 import org.scribe.builder.api.TwitterApi
 
+import spock.lang.Shared
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import org.scribe.builder.ServiceBuilder
 import org.codehaus.groovy.grails.web.servlet.mvc.exceptions.InvalidUriException
+import org.springframework.beans.factory.BeanCreationException
 
-class OauthServiceSpec extends UnitSpec {
+// This is a horrible hack. To disable automatic mocking and wiring of the
+// OauthService bean (because we can't test the configuration handling otherwise)
+// we deliberately mark this test case as for a different service. If the
+// following line is remove, the tests will start failing with mysterious
+// errors!
+@TestFor(OauthResourceService)
+class OauthServiceSpec extends Specification {
 
     def 'Configuration is missing'() {
 
+        given:
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [:]]
+
         when:
-            new OauthService()
+            service.afterPropertiesSet()
 
         then:
-            thrown(IllegalStateException)
-
+            1 == 1
+            thrown IllegalStateException
     }
 
     def 'OAuthService can handle multiple providers'() {
 
         given:
-            mockConfig """
-                import org.scribe.builder.api.TwitterApi
-                import org.scribe.builder.api.FacebookApi
-
-                oauth {
-                    providers {
-                        twitter {
-                            api = TwitterApi
-                            key = 'twitter'
-                            secret = 'identica'
-                        }
-                        facebook {
-                            api = FacebookApi
-                            key = 'zuckerberg'
-                            secret = 'brothers'
-                        }
-                    }
-                }
-            """
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            twitter: [
+                                api: org.scribe.builder.api.TwitterApi,
+                                key: "twitter",
+                                secret: "identica" ],
+                            facebook: [
+                                api: org.scribe.builder.api.FacebookApi,
+                                key: "zuckerberg",
+                                secret: "brothers" ] ]]]]
+            service.afterPropertiesSet()
 
         expect:
-            OauthService service = new OauthService()
             service.services.size() == 2
 
     }
@@ -56,28 +62,21 @@ class OauthServiceSpec extends UnitSpec {
     def 'OAuthService lower-cases provider names'() {
 
         given:
-            mockConfig """
-                import org.scribe.builder.api.TwitterApi
-                import org.scribe.builder.api.FacebookApi
-
-                oauth {
-                    providers {
-                        twitter {
-                            api = TwitterApi
-                            key = 'twitter'
-                            secret = 'identica'
-                        }
-                        FaceBook {
-                            api = FacebookApi
-                            key = 'zuckerberg'
-                            secret = 'brothers'
-                        }
-                    }
-                }
-            """
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            twitter: [
+                                api: org.scribe.builder.api.TwitterApi,
+                                key: "twitter",
+                                secret: "identica" ],
+                            facebook: [
+                                api: org.scribe.builder.api.FacebookApi,
+                                key: "zuckerberg",
+                                secret: "brothers" ] ]]]]
+            service.afterPropertiesSet()
 
         expect:
-            OauthService service = new OauthService()
             service.services.keySet() == ['twitter', 'facebook'] as Set<String>
 
     }
@@ -86,22 +85,17 @@ class OauthServiceSpec extends UnitSpec {
     def 'Configuration contains valid provider #provider'() {
 
         given:
-            mockConfig """
-                import org.scribe.builder.api.TwitterApi
-
-                oauth {
-                    providers {
-                        twitter {
-                            api = TwitterApi
-                            key = 'myKey'
-                            secret = 'mySecret'
-                        }
-                    }
-                }
-            """
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            twitter: [
+                                api: org.scribe.builder.api.TwitterApi,
+                                key: "myKey",
+                                secret: "mySecret" ] ]]]]
 
         expect:
-            new OauthService()
+            service.afterPropertiesSet()
 
         where:
             provider << [TwitterApi, CustomProviderApi]
@@ -116,23 +110,17 @@ class OauthServiceSpec extends UnitSpec {
             boolean debugEnabled = false
             ServiceBuilder.metaClass.debug = { debugEnabled = true }
 
-            mockConfig """
-                import org.scribe.builder.api.TwitterApi
-
-                oauth {
-                    providers {
-                        twitter {
-                            api = TwitterApi
-                            key = 'myKey'
-                            secret = 'mySecret'
-                        }
-                    }
-                    debug = ${debug}
-                }
-            """
-
         and:
-            new OauthService()
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            twitter: [
+                                api: org.scribe.builder.api.TwitterApi,
+                                key: "myKey",
+                                secret: "mySecret" ] ],
+                        debug: debug ] ]]
+            service.afterPropertiesSet()
 
         expect:
             debugEnabled == debug
@@ -150,23 +138,17 @@ class OauthServiceSpec extends UnitSpec {
             String providedScope = null
             ServiceBuilder.metaClass.scope = { String passedScope -> providedScope = passedScope }
 
-            mockConfig """
-                import org.scribe.builder.api.TwitterApi
-
-                oauth {
-                    providers {
-                        twitter {
-                            api = TwitterApi
-                            key = 'myKey'
-                            secret = 'mySecret'
-                            ${scope ? "scope = 'testScope'" : ""}
-                        }
-                    }
-                }
-            """
-
         and:
-            new OauthService()
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            twitter: [
+                                api: org.scribe.builder.api.TwitterApi,
+                                key: "myKey",
+                                secret: "mySecret",
+                                scope: scope ? 'testScope' : null ] ]]]]
+            service.afterPropertiesSet()
 
         expect:
             providedScope == (scope ? 'testScope' : null)
@@ -183,50 +165,41 @@ class OauthServiceSpec extends UnitSpec {
 
     def 'Configuration contains a non-class as a provider'() {
 
-            when:
-                mockConfig """
+        given:
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            invalid: [
+                                api: 'some custom string',
+                                key: "myKey",
+                                secret: "mySecret" ] ]]]]
 
-                    oauth {
-                        providers {
-                            invalid {
-                                api = 'some custom string'
-                                key = 'myKey'
-                                secret = 'mySecret'
-                            }
-                        }
-                    }
-                """
+        when:
+            service.afterPropertiesSet()
 
-            and:
-                new OauthService()
-
-            then:
-                thrown(InvalidOauthProviderException)
+        then:
+            thrown(InvalidOauthProviderException)
 
     }
 
     def 'Configuration contains a non-implementing class as a provider'() {
 
-            when:
-                mockConfig """
-                    import uk.co.desirableobjects.oauth.scribe.OauthServiceSpec.InvalidProviderApi
+        given:
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            invalid: [
+                                api: InvalidProviderApi,
+                                key: "myKey",
+                                secret: "mySecret" ] ]]]]
 
-                    oauth {
-                        providers {
-                            invalid {
-                                api = InvalidProviderApi
-                                key = 'myKey'
-                                secret = 'mySecret'
-                            }
-                        }
-                    }
-                """
+        when:
+            service.afterPropertiesSet()
 
-            and:
-                new OauthService()
-
-            then:
-                thrown(InvalidOauthProviderException)
+        then:
+            thrown(InvalidOauthProviderException)
 
     }
 
@@ -235,36 +208,26 @@ class OauthServiceSpec extends UnitSpec {
 
 
         given:
-
-            mockConfig """
-                import org.scribe.builder.api.*
-
-                oauth {
-                    providers {
-                        twitter {
-                            api = TwitterApi
-                            key = ${key}
-                            secret = ${secret}
-                        }
-                        facebook {
-                            api = FacebookApi
-                            key = 'facebook-key'
-                            secret = 'facebook-secret'
-                        }
-                    }
-                }
-            """
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            twitter: [
+                                api: org.scribe.builder.api.TwitterApi,
+                                key: key,
+                                secret: secret ],
+                            facebook: [
+                                api: org.scribe.builder.api.FacebookApi,
+                                key: "facebook-key",
+                                secret: "facebook-secret" ] ]]]]
 
         when:
-
-            new OauthService()
+            service.afterPropertiesSet()
 
         then:
-
             thrown(IllegalStateException)
 
         where:
-
             key     | secret
             null    | "'secret'"
             "'key'" | null
@@ -275,56 +238,41 @@ class OauthServiceSpec extends UnitSpec {
     // validate signature types
     def 'callback URL and Signature Type is supported but optional'() {
 
-        when:
-            mockConfig """
-                    import org.scribe.builder.api.TwitterApi
-                    import org.scribe.model.SignatureType
+        given:
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            twitter: [
+                                api: org.scribe.builder.api.TwitterApi,
+                                key: 'myKey',
+                                secret: 'mySecret',
+                                callback: 'http://example.com:1234/url',
+                                signatureType: org.scribe.model.SignatureType.QueryString ] ]]]]
 
-                    oauth {
-                        providers {
-                            twitter {
-                                api = TwitterApi
-                                key = 'myKey'
-                                secret = 'mySecret'
-                                callback = 'http://example.com:1234/url'
-                                signatureType = SignatureType.QueryString
-                            }
-                        }
-                    }
-                """
-
-        then:
-
-            new OauthService()
+        expect:
+            service.afterPropertiesSet() == null
 
     }
 
     def 'configuration contains a successUri and a failureUri'() {
 
         given:
-
-            mockConfig '''
-                import org.scribe.builder.api.TwitterApi
-
-                oauth {
-                    providers {
-                        twitter {
-                            api = TwitterApi
-                            key = 'myKey'
-                            secret = 'mySecret'
-                            successUri = '/coffee/tea'
-                            failureUri = '/cola/pepsi'
-                        }
-                    }
-                }
-            '''
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            twitter: [
+                                api: org.scribe.builder.api.TwitterApi,
+                                key: 'myKey',
+                                secret: 'mySecret',
+                                successUri: '/coffee/tea',
+                                failureUri: '/cola/pepsi' ] ]]]]
 
         when:
-
-            OauthService service = new OauthService()
+            service.afterPropertiesSet()
 
         then:
-
             service.services.twitter.successUri == '/coffee/tea'
             service.services.twitter.failureUri == '/cola/pepsi'
 
@@ -333,29 +281,21 @@ class OauthServiceSpec extends UnitSpec {
     def 'configuration can set socket and receive timeouts'() {
 
         given:
-
-            mockConfig '''
-                import org.scribe.builder.api.TwitterApi
-
-                oauth {
-                    providers {
-                        twitter {
-                            api = TwitterApi
-                            key = 'myKey'
-                            secret = 'mySecret'
-                        }
-                    }
-                    connectTimeout = 5000
-                    receiveTimeout = 5000
-                }
-            '''
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            twitter: [
+                                api: org.scribe.builder.api.TwitterApi,
+                                key: 'myKey',
+                                secret: 'mySecret' ]],
+                        connectTimeout: 5000,
+                        receiveTimeout: 5000 ]]]
 
         when:
-
-            OauthService service = new OauthService()
+            service.afterPropertiesSet()
 
         then:
-
             service.connectTimeout == 5000
             service.receiveTimeout == 5000
 
@@ -365,24 +305,19 @@ class OauthServiceSpec extends UnitSpec {
     def 'if connection and recieve timeouts are not set, they are defaulted to thirty seconds'() {
 
         given:
-            mockConfig '''
-                import org.scribe.builder.api.TwitterApi
-
-                oauth {
-                    providers {
-                        twitter {
-                            api = TwitterApi
-                            key = 'myKey'
-                            secret = 'mySecret'
-                            successUri = '/coffee/tea'
-                            failureUri = '/cola/pepsi'
-                        }
-                    }
-                }
-            '''
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            twitter: [
+                                api: org.scribe.builder.api.TwitterApi,
+                                key: 'myKey',
+                                secret: 'mySecret',
+                                successUri: '/coffee/tea',
+                                failureUri: '/cola/pepsi' ] ]]]]
 
         when:
-            OauthService service = new OauthService()
+            service.afterPropertiesSet()
 
         then:
             service.connectTimeout == 30000
@@ -394,32 +329,25 @@ class OauthServiceSpec extends UnitSpec {
     def 'Service returns correct API version when given #apiClass'() {
 
         given:
-
-            mockConfig """
-
-                oauth {
-                    providers {
-                        dynamic {
-                            api = ${apiClass}
-                            key = 'myKey'
-                            secret = 'mySecret'
-                        }
-                    }
-                }
-            """
+            OauthService service = new OauthService()
+            service.grailsApplication = [config: [
+                    oauth: [
+                        providers: [
+                            dynamic: [
+                                api: apiClass,
+                                key: 'myKey',
+                                secret: 'mySecret' ] ]]]]
 
         when:
-
-            OauthService service = new OauthService()
+            service.afterPropertiesSet()
 
         then:
-
             service.services.dynamic.oauthVersion == apiVersion
 
         where:
-            apiClass                                                               | apiVersion
-            'uk.co.desirableobjects.oauth.scribe.test.Test10aApiImplementation'    | SupportedOauthVersion.ONE
-            'org.scribe.builder.api.FacebookApi'                                   | SupportedOauthVersion.TWO
+            apiClass                              | apiVersion
+            'org.scribe.builder.api.TwitterApi'   | SupportedOauthVersion.ONE
+            'org.scribe.builder.api.FacebookApi'  | SupportedOauthVersion.TWO
 
     }
 
