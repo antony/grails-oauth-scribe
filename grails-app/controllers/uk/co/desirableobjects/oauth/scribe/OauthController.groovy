@@ -7,7 +7,7 @@ import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenExceptio
 
 class OauthController {
 
-    private final Token EMPTY_TOKEN = null
+    private final Token EMPTY_TOKEN = new Token('', '')
 
     OauthService oauthService
 
@@ -63,7 +63,7 @@ class OauthController {
         OauthProvider provider = oauthService.findProviderConfiguration(providerName)
 
         Token requestToken = EMPTY_TOKEN
-        if (provider.getOauthVersion() == SupportedOauthVersion.ONE) {
+        if (provider.oauthVersion == SupportedOauthVersion.ONE) {
             requestToken = provider.service.requestToken
         }
 

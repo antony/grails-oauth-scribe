@@ -8,6 +8,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 import spock.lang.Shared
 import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
+import spock.lang.Unroll
 
 @TestFor(OauthController)
 class OauthControllerSpec extends Specification {
@@ -119,9 +120,12 @@ class OauthControllerSpec extends Specification {
 
     def 'In Oauth 2, request token endpoint is not hit'() {
 
+        given:
+            Token emptyToken = controller.EMPTY_TOKEN
+            controller.params.provider = PROVIDER_NAME
+
         when:
 
-            controller.params.provider = PROVIDER_NAME
             controller.authenticate()
 
         then:
@@ -129,15 +133,16 @@ class OauthControllerSpec extends Specification {
             controller.oauthService.findProviderConfiguration(PROVIDER_NAME) >> { return provider }
             provider.service.version >> { return '2.0' }
             controller.oauthService.findSessionKeyForRequestToken(PROVIDER_NAME) >> { return REQUEST_TOKEN_SESSION_KEY }
-            controller.oauthService.getAuthorizationUrl(PROVIDER_NAME, null) >> { return 'http://authorisation.url/auth' }
+            controller.oauthService.getAuthorizationUrl(PROVIDER_NAME, emptyToken) >> { return 'http://authorisation.url/auth' }
 
         and:
-            !session[REQUEST_TOKEN_SESSION_KEY]
+            session[REQUEST_TOKEN_SESSION_KEY] == emptyToken
             controller.response.redirectUrl == 'http://authorisation.url/auth'
 
     }
 
-    def 'Oauth callback is hit but there is no request token in the session (bad callback domain)'() {
+    @Unroll
+    def 'Oauth callback is hit but there is no request token in the session (bad callback domain) for oauth #oauthVersion'() {
 
         given:
             controller.params.provider = PROVIDER_NAME
@@ -150,15 +155,18 @@ class OauthControllerSpec extends Specification {
         then:
             controller.oauthService.findSessionKeyForRequestToken(PROVIDER_NAME) >> { return REQUEST_TOKEN_SESSION_KEY }
             controller.oauthService.findProviderConfiguration(PROVIDER_NAME) >> { return provider }
-            provider.service.version >> { return '2.0' }
+            provider.service.version >> { return oauthVersion }
 
         and:
             def exception = thrown MissingRequestTokenException
             exception.message == "We couldn't find a request token for twitter in the session. A common cause of this is that you have been given a new session by the servlet container because your callback domain is different to the domain you are authenticating from. Check that the domain name in the URL bar of your browser matches the domain name of your callback URL"
 
+        where:
+            oauthVersion = ['1.0', '2.0']
+
     }
 
-    // TODO: {"error":{"message":"Error validating client secret.","type":"OAuthException"}}
+        // TODO: {"error":{"message":"Error validating client secret.","type":"OAuthException"}}
     // TODO: Catch and deal with timeouts in a sensible way.
 
 }

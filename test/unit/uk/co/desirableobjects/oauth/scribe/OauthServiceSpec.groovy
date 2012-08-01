@@ -14,6 +14,7 @@ import spock.lang.Unroll
 import org.scribe.builder.ServiceBuilder
 import org.codehaus.groovy.grails.web.servlet.mvc.exceptions.InvalidUriException
 import org.springframework.beans.factory.BeanCreationException
+import grails.test.mixin.TestFor
 
 // This is a horrible hack. To disable automatic mocking and wiring of the
 // OauthService bean (because we can't test the configuration handling otherwise)
