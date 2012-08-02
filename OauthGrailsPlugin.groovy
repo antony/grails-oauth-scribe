@@ -1,6 +1,6 @@
 class OauthGrailsPlugin {
 
-    def version = "2.0.3"
+    def version = "2.1-SNAPSHOT"
 
     def grailsVersion = "1.3.1 > *"
 
