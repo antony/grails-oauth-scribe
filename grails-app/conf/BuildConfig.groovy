@@ -16,7 +16,7 @@ grails.project.dependency.resolution = {
         grailsHome()
         grailsCentral()
 
-        mavenLocal(null)
+        mavenLocal
         mavenCentral()
         mavenRepo 'http://repo.desirableobjects.co.uk'
     }
