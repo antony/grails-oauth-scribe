@@ -16,26 +16,38 @@ class OauthResourceService {
     }
 
     Response accessResource(OAuthService service, Token accessToken, Verb verb, String url, Map body, int connectTimeout, int receiveTimeout) {
-        OAuthRequest oAuthRequest = new OAuthRequest(verb, url)
-        oAuthRequest.setConnectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
-        oAuthRequest.setReadTimeout(receiveTimeout, TimeUnit.MILLISECONDS)
+
+        OAuthRequest req = buildOauthRequest(verb, url, connectTimeout, receiveTimeout)
         body?.each {String k, String v->
-            oAuthRequest.addBodyParameter(k, v)
+            req.addBodyParameter(k, v)
         }
-        service.signRequest(accessToken, oAuthRequest)
-        return oAuthRequest.send()
+        return signAndSend(service, accessToken, req)
 
     }
 
     Response accessResource(OAuthService service, Token accessToken, Verb verb, String url, String payload, String contentType, int connectTimeout, int receiveTimeout) {
-        OAuthRequest oAuthRequest = new OAuthRequest(verb, url)
-        oAuthRequest.setConnectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
-        oAuthRequest.setReadTimeout(receiveTimeout, TimeUnit.MILLISECONDS)
-        oAuthRequest.addPayload(payload)
-        oAuthRequest.addHeader("Content-Length", Integer.toString(payload.length()))
-        oAuthRequest.addHeader("Content-Type", contentType)
-        service.signRequest(accessToken, oAuthRequest)
-        return oAuthRequest.send()
+
+        OAuthRequest req = buildOauthRequest(verb, url, connectTimeout, receiveTimeout)
+        req.addPayload(payload)
+        req.addHeader("Content-Length", Integer.toString(payload.length()))
+        req.addHeader("Content-Type", contentType)
+        return signAndSend(service, accessToken, req)
+
+    }
+
+    private OAuthRequest buildOauthRequest(Verb verb, String url, int connectTimeout, int receiveTimeout) {
+
+        OAuthRequest req = new OAuthRequest(verb, url)
+        req.setConnectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
+        req.setReadTimeout(receiveTimeout, TimeUnit.MILLISECONDS)
+        return req
+
+    }
+
+    private Response signAndSend(OAuthService service, Token accessToken, OAuthRequest req) {
+
+        service.signRequest(accessToken, req)
+        return req.send()
 
     }
 }
