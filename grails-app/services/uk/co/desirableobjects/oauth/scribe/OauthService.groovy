@@ -1,7 +1,5 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
-
 import uk.co.desirableobjects.oauth.scribe.exception.InvalidOauthProviderException
 import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 import org.scribe.builder.ServiceBuilder
@@ -15,6 +13,7 @@ import org.scribe.model.SignatureType
 import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
 import uk.co.desirableobjects.oauth.scribe.util.DynamicMethods
 import org.springframework.beans.factory.InitializingBean
+import uk.co.desirableobjects.oauth.scribe.exception.InvalidProviderClassException
 
 class OauthService implements InitializingBean {
 
@@ -44,10 +43,10 @@ class OauthService implements InitializingBean {
 
             buildService(conf)
 
-        } catch (GroovyCastException gce) {
-            throw new InvalidOauthProviderException("${CH.config.oauth.provider} is not a Class" as String)
+        } catch (InvalidProviderClassException ipce) {
+            throw new InvalidOauthProviderException(ipce.message)
         } catch (OAuthException oae) {
-            throw new InvalidOauthProviderException("${CH.config.oauth.provider} does not implement the Api interface" as String, oae)
+            throw new InvalidOauthProviderException(oae.message, oae)
         }
 
         configureTimeouts(conf)
@@ -72,7 +71,13 @@ class OauthService implements InitializingBean {
                 String name = configuration.key.toString().toLowerCase()
                 LinkedHashMap providerConfig = configuration.value
 
-                Class api = providerConfig.api
+                Class api
+                try {
+                    api = providerConfig.api
+                } catch (GroovyCastException gce) {
+                    throw new InvalidProviderClassException(name, providerConfig.api)
+                }
+
                 String callback = providerConfig.containsKey('callback') ? providerConfig.callback : null
                 SignatureType signatureType = providerConfig.containsKey('signatureType') ? providerConfig.signatureType : null
                 String scope = providerConfig.containsKey('scope') ? providerConfig.scope : null

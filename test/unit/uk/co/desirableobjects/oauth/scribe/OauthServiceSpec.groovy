@@ -82,24 +82,20 @@ class OauthServiceSpec extends Specification {
 
     }
 
-    @Unroll
-    def 'Configuration contains valid provider #provider'() {
+    def 'Configuration contains valid provider Twitter'() {
 
         given:
             OauthService service = new OauthService()
             service.grailsApplication = [config: [
                     oauth: [
                         providers: [
-                            twitter: [
-                                api: org.scribe.builder.api.TwitterApi,
+                            mine: [
+                                api: TwitterApi,
                                 key: "myKey",
                                 secret: "mySecret" ] ]]]]
 
         expect:
             service.afterPropertiesSet()
-
-        where:
-            provider << [TwitterApi, CustomProviderApi]
 
     }
 
