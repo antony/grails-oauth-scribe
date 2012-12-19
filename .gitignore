@@ -11,3 +11,7 @@ plugin.xml
 *.zip
 target
 out
+web-app/images
+web-app/css
+web-app/js
+grails-app/i18n

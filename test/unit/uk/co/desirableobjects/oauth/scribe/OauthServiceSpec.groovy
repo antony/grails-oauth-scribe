@@ -34,7 +34,6 @@ class OauthServiceSpec extends Specification {
             service.afterPropertiesSet()
 
         then:
-            1 == 1
             thrown IllegalStateException
     }
 

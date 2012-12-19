@@ -1,5 +1,9 @@
 package uk.co.desirableobjects.oauth.scribe
 
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.scribe.builder.api.TwitterApi
+import spock.lang.Specification
 import spock.lang.Stepwise
 import org.scribe.model.Token
 import spock.lang.Shared
@@ -14,8 +18,8 @@ import spock.lang.Unroll
 import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
 
 @Stepwise
-@Mixin(GMockAddon)
-class AuthorisationProcessSpec extends UnitSpec {
+@TestMixin(GrailsUnitTestMixin)
+class AuthorisationProcessSpec extends Specification {
 
     private static final String DUMMY_OAUTH_RESOURCE_URI = 'http://example.org/list'
     @Shared Token requestToken
@@ -26,6 +30,17 @@ class AuthorisationProcessSpec extends UnitSpec {
         def 'a request token can be fetched'() {
 
                 given:
+
+                    grailsApplication.config = [oauth:
+                        [providers:
+                            [twitter:[
+                                    api: TwitterApi,
+                                    key: 'myKey',
+                                    secret: 'mySecret'
+                                ]
+                            ]
+                        ]
+                    ]
 
                     mockConfig """
                         import org.scribe.builder.api.TwitterApi
@@ -162,6 +177,7 @@ class AuthorisationProcessSpec extends UnitSpec {
 
                 oaService.oauthResourceService = mock(OauthResourceService)
                 oaService.oauthResourceService.accessResource(oaService.services['twitter'].service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, '<data>mock data</data>', 'application/xml', 30000, 30000).returns(oaResponse)
+
             when:
 
                 String body = null
