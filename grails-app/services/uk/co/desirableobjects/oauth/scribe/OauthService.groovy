@@ -190,7 +190,10 @@ class OauthService implements InitializingBean {
                        url: args[1] as String,
                        bodyParameters: (args.length > 2) ? args[2] as Map : null
                )
-               resourceAccessor.addHeader('Content-Type', args[3] as String)
+
+               if (args.length > 3) {
+                    resourceAccessor.addHeader('Content-Type', args[3] as String)
+               }
 
                return oauthResourceService.accessResource(findService(serviceName), args[0] as Token, resourceAccessor)
 

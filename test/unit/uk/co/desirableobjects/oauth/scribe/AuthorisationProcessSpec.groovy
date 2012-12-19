@@ -16,13 +16,14 @@ import org.scribe.model.Response
 import org.springframework.http.HttpStatus
 import spock.lang.Unroll
 import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
+import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 
 @Stepwise
 @TestMixin(GrailsUnitTestMixin)
 class AuthorisationProcessSpec extends Specification {
 
     private static final String DUMMY_OAUTH_RESOURCE_URI = 'http://example.org/list'
-    @Shared Token requestToken
+        @Shared Token requestToken
         @Shared Token accessToken
         @Shared OauthService oaService
 
@@ -31,30 +32,17 @@ class AuthorisationProcessSpec extends Specification {
 
                 given:
 
-                    grailsApplication.config = [oauth:
-                        [providers:
-                            [twitter:[
-                                    api: TwitterApi,
-                                    key: 'myKey',
-                                    secret: 'mySecret'
-                                ]
-                            ]
-                        ]
-                    ]
+//                    grailsApplication.config = [oauth:
+//                        [providers:
+//                            [twitter:[
+//                                    api: TwitterApi,
+//                                    key: 'myKey',
+//                                    secret: 'mySecret'
+//                                ]
+//                            ]
+//                        ]
+//                    ]
 
-                    mockConfig """
-                        import org.scribe.builder.api.TwitterApi
-
-                        oauth {
-                            providers {
-                                twitter {
-                                    api = TwitterApi
-                                    key = 'myKey'
-                                    secret = 'mySecret'
-                                }
-                            }
-                        }
-                    """
                     oaService = new OauthService()
                     oaService.grailsApplication = [config: [
                             oauth: [
@@ -65,15 +53,16 @@ class AuthorisationProcessSpec extends Specification {
                                         secret: "mySecret" ] ]]]]
                     oaService.afterPropertiesSet()
 
-                    oaService.services.twitter.service = mock(OAuthService)
-                    oaService.services.twitter.service.getRequestToken().returns(new Token('a', 'b', 'c'))
+                    oaService.services.twitter.service = Mock(OAuthService)
 
                 when:
-                    simulate {
-                        requestToken = oaService.getTwitterRequestToken()
-                    }
+                    requestToken = oaService.getTwitterRequestToken()
 
                 then:
+                    1 * oaService.services.twitter.service.getRequestToken() >> { return new Token('a', 'b', 'c') }
+                    0 * _
+
+                and:
                     requestToken.rawResponse == 'c'
 
         }
@@ -81,131 +70,131 @@ class AuthorisationProcessSpec extends Specification {
         def 'make the user validate our token'() {
 
             given:
+                oaService.services.twitter.service = Mock(OAuthService)
 
-                oaService.services.twitter.service.getAuthorizationUrl(requestToken).returns('http://example.org/auth')
+            when:
+                String authUrl = oaService.getTwitterAuthorizationUrl(requestToken)
 
-            expect:
+            then:
+                1 * oaService.services.twitter.service.getAuthorizationUrl(requestToken) >> { return 'http://example.org/auth' }
+                0 * _
 
-                simulate {
-                    oaService.getTwitterAuthorizationUrl(requestToken) == 'http://example.org/auth'
-                }
+            and:
+                authUrl == 'http://example.org/auth'
 
         }
 
         def 'get the access token'() {
 
             given:
-
                 Token expectedToken = new Token('d', 'e', 'f')
                 Verifier verifier = new Verifier('abcde')
-                oaService.services.twitter.service = mock(OAuthService)
-                oaService.services.twitter.service.getAccessToken(requestToken, verifier).returns(expectedToken)
+                oaService.services.twitter.service = Mock(OAuthService)
 
             when:
-
-                simulate {
-                    accessToken = oaService.getTwitterAccessToken(requestToken, verifier)
-                }
+                accessToken = oaService.getTwitterAccessToken(requestToken, verifier)
 
            then:
+                1 * oaService.services.twitter.service.getAccessToken(requestToken, verifier) >> { return expectedToken }
+                0 * _
 
+           and:
                 accessToken.rawResponse == 'f'
 
         }
 
         // TODO: Why do we fetch and pass the token - if we don't pass it, you could automatically get it?
         @Unroll
-        def 'make a #verb request using the authorised connection'() {
+        def 'make a #verb request using the authorised connection with an xml payload'() {
 
             given:
-
-                oaService.services['twitter'].service = mock(OAuthService)
+                oaService.services.twitter.service = Mock(OAuthService)
+                oaService.oauthResourceService = Mock(OauthResourceService)
+                Response oaResponse = Mock(Response)
 
             and:
-            
                 String expectedResponse = 'Hello There.'
-                Response oaResponse = mock(Response)
-                oaResponse.getBody().returns(expectedResponse)
-                oaResponse.getCode().returns(HttpStatus.OK.value())
-            
-            and:
 
-                oaService.oauthResourceService = mock(OauthResourceService)
-                oaService.oauthResourceService.accessResource(oaService.services['twitter'].service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, null, 30000, 30000).returns(oaResponse)
             when:
-
                 String body = null
                 int code = -1
 
             and:
-
-                simulate {
-
-                    def actualResponse = oaService."${verb.name().toLowerCase()}TwitterResource"(accessToken, DUMMY_OAUTH_RESOURCE_URI)
-                    body = actualResponse.body
-                    code = actualResponse.code
-
-                }
+                def actualResponse = oaService."${verb}TwitterResourceWithPayload"(accessToken, DUMMY_OAUTH_RESOURCE_URI, payload, headers)
+                body = actualResponse.body
+                code = actualResponse.code
 
             then:
+                1 * oaService.oauthResourceService.accessResource(oaService.services.twitter.service, accessToken, { ResourceAccessor ra ->
+                    ra.connectTimeout == 30000
+                    ra.receiveTimeout == 30000
+                    ra.verb == verb
+                    ra.url == DUMMY_OAUTH_RESOURCE_URI
+                    ra.payload = payload?.bytes
+                } as ResourceAccessor) >> { return oaResponse }
+                1 * oaResponse.getBody() >> expectedResponse
+                1 * oaResponse.getCode() >> HttpStatus.OK.value()
+                0 * _
+
+            and:
 
                 code == HttpStatus.OK.value()
                 body == expectedResponse
 
             where:
 
-                verb << Verb.values()
-
-
-        }
-
-        @Unroll
-        def 'make a #verb request using the authorised connection and an xml payload'() {
-
-            given:
-
-                oaService.services['twitter'].service = mock(OAuthService)
-
-            and:
-
-                String expectedResponse = 'Hello There.'
-                Response oaResponse = mock(Response)
-                oaResponse.getBody().returns(expectedResponse)
-                oaResponse.getCode().returns(HttpStatus.OK.value())
-
-            and:
-
-                oaService.oauthResourceService = mock(OauthResourceService)
-                oaService.oauthResourceService.accessResource(oaService.services['twitter'].service, accessToken, verb, DUMMY_OAUTH_RESOURCE_URI, '<data>mock data</data>', 'application/xml', 30000, 30000).returns(oaResponse)
-
-            when:
-
-                String body = null
-                int code = -1
-
-            and:
-
-                simulate {
-
-                    def actualResponse = oaService."${verb.name().toLowerCase()}TwitterResourceWithPayload"(accessToken, DUMMY_OAUTH_RESOURCE_URI, '<data>mock data</data>', 'application/xml')
-                    body = actualResponse.body
-                    code = actualResponse.code
-
-                }
-
-            then:
-
-                code == HttpStatus.OK.value()
-                body == expectedResponse
-
-            where:
-
-                verb << Verb.values()
-
+                verb      | payload                 | headers
+                'get'     | '<xml><tag /></xml>'    | ['Content-Length': 15, 'Content-Type': 'application/xml']
+                'post'    | '<xml><tag /></xml>'    | [:]
+                'delete'  | 'xyzabc'                | ['Content-Type': 'application/xml', Accept: 'application/pdf' ]
 
         }
 
-        def 'try to call an invalid resource accessor method on the service' () {
+    @Unroll
+    def 'make a #verb request using the authorised connection'() {
+
+        given:
+            oaService.services.twitter.service = Mock(OAuthService)
+            oaService.oauthResourceService = Mock(OauthResourceService)
+            Response oaResponse = Mock(Response)
+
+        and:
+            String expectedResponse = 'Hello There.'
+
+        when:
+            String body = null
+            int code = -1
+
+        and:
+            def actualResponse = oaService."${verb}TwitterResource"(accessToken, DUMMY_OAUTH_RESOURCE_URI, [a: 'b'], 'application/pdf')
+            body = actualResponse.body
+            code = actualResponse.code
+
+        then:
+            1 * oaService.oauthResourceService.accessResource(oaService.services.twitter.service, accessToken, { ResourceAccessor ra ->
+                ra.connectTimeout == 30000
+                ra.receiveTimeout == 30000
+                ra.verb == verb
+                ra.url == DUMMY_OAUTH_RESOURCE_URI
+                ra.bodyParameters = [a: 'b']
+                println ra.headers
+                //ra.headers == [Accept: 'application/pdf']
+            } as ResourceAccessor) >> { return oaResponse }
+            1 * oaResponse.getBody() >> expectedResponse
+            1 * oaResponse.getCode() >> HttpStatus.OK.value()
+            0 * _
+
+        and:
+            code == HttpStatus.OK.value()
+            body == expectedResponse
+
+        where:
+            verb << ['delete', 'post', 'get']
+
+    }
+
+
+    def 'try to call an invalid resource accessor method on the service' () {
 
             when:
 

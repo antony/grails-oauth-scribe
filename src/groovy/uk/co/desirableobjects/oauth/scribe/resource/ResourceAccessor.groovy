@@ -1,7 +1,9 @@
 package uk.co.desirableobjects.oauth.scribe.resource
 
+import groovy.transform.EqualsAndHashCode
 import org.scribe.model.Verb
 
+@EqualsAndHashCode
 class ResourceAccessor {
 
     int connectTimeout
