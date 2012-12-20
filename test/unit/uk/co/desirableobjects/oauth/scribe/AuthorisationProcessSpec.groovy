@@ -166,7 +166,7 @@ class AuthorisationProcessSpec extends Specification {
             int code = -1
 
         and:
-            def actualResponse = oaService."${verb}TwitterResource"(accessToken, DUMMY_OAUTH_RESOURCE_URI, [a: 'b'], 'application/pdf')
+            def actualResponse = oaService."${verb}TwitterResource"(accessToken, DUMMY_OAUTH_RESOURCE_URI, [a: 'b'], [Accept: 'application/pdf', 'Content-Type': 'application/json'])
             body = actualResponse.body
             code = actualResponse.code
 
@@ -176,9 +176,8 @@ class AuthorisationProcessSpec extends Specification {
                 ra.receiveTimeout == 30000
                 ra.verb == verb
                 ra.url == DUMMY_OAUTH_RESOURCE_URI
-                ra.bodyParameters = [a: 'b']
-                println ra.headers
-                //ra.headers == [Accept: 'application/pdf']
+                ra.bodyParameters == [a: 'b']
+                ra.headers == [Accept: 'application/pdf', 'Content-Type': 'application/json']
             } as ResourceAccessor) >> { return oaResponse }
             1 * oaResponse.getBody() >> expectedResponse
             1 * oaResponse.getCode() >> HttpStatus.OK.value()

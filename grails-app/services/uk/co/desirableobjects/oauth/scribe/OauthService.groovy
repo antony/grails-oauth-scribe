@@ -192,7 +192,7 @@ class OauthService implements InitializingBean {
                )
 
                if (args.length > 3) {
-                    resourceAccessor.addHeader('Content-Type', args[3] as String)
+                    resourceAccessor.headers.putAll(args[3] as Map<String, String>)
                }
 
                return oauthResourceService.accessResource(findService(serviceName), args[0] as Token, resourceAccessor)
@@ -213,7 +213,8 @@ class OauthService implements InitializingBean {
                     url: args[1] as String,
                     payload: (args[2] as String).bytes,
             )
-            resourceAccessor.addHeader('Content-Type', args[3] as String)
+
+            resourceAccessor.headers.putAll(args[3] as Map<String, String>)
 
             return oauthResourceService.accessResource(service, args[0] as Token, resourceAccessor)
 
