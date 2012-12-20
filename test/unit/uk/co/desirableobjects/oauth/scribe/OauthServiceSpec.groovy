@@ -1,6 +1,8 @@
 package uk.co.desirableobjects.oauth.scribe
 
 import grails.plugin.spock.UnitSpec
+import org.scribe.model.Token
+import org.scribe.model.Verb
 import uk.co.desirableobjects.oauth.scribe.exception.InvalidOauthProviderException
 import org.scribe.builder.api.Api
 import org.scribe.oauth.OAuthService
@@ -15,6 +17,7 @@ import org.scribe.builder.ServiceBuilder
 import org.codehaus.groovy.grails.web.servlet.mvc.exceptions.InvalidUriException
 import org.springframework.beans.factory.BeanCreationException
 import grails.test.mixin.TestFor
+import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 
 // This is a horrible hack. To disable automatic mocking and wiring of the
 // OauthService bean (because we can't test the configuration handling otherwise)
@@ -278,6 +281,7 @@ class OauthServiceSpec extends Specification {
 
         given:
             OauthService service = new OauthService()
+            service.oauthResourceService = Mock(OauthResourceService)
             service.grailsApplication = [config: [
                     oauth: [
                         providers: [
@@ -294,6 +298,16 @@ class OauthServiceSpec extends Specification {
         then:
             service.connectTimeout == 5000
             service.receiveTimeout == 5000
+
+        when:
+            service.getTwitterResource(new Token('myKey', 'mySecret'), 'http://www.example.com')
+
+        then:
+            1 * service.oauthResourceService.accessResource(_ as OAuthService, _ as Token, { ResourceAccessor ra ->
+                ra.connectTimeout == 5000
+                ra.receiveTimeout == 5000
+            } as ResourceAccessor)
+            0 * _
 
     }
 

@@ -186,6 +186,8 @@ class OauthService implements InitializingBean {
               Verb actualVerb = Verb.valueOf(verb.toUpperCase())
 
                ResourceAccessor resourceAccessor = new ResourceAccessor(
+                       connectTimeout: this.connectTimeout,
+                       receiveTimeout: this.receiveTimeout,
                        verb: actualVerb,
                        url: args[1] as String,
                        bodyParameters: (args.length > 2) ? args[2] as Map : null
@@ -209,6 +211,8 @@ class OauthService implements InitializingBean {
             OAuthService service = findService(serviceName)
 
             ResourceAccessor resourceAccessor = new ResourceAccessor(
+                    connectTimeout: this.connectTimeout,
+                    receiveTimeout: this.receiveTimeout,
                     verb: actualVerb,
                     url: args[1] as String,
                     payload: (args[2] as String).bytes,
