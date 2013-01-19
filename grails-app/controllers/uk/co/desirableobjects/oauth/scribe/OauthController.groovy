@@ -1,13 +1,14 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import org.scribe.model.Verifier
-import org.scribe.model.Token
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
+import org.scribe.model.Token
+import org.scribe.model.Verifier
+
 import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
 
 class OauthController {
 
-    private final Token EMPTY_TOKEN = new Token('', '')
+    private static final Token EMPTY_TOKEN = new Token('', '')
 
     OauthService oauthService
 
@@ -19,10 +20,11 @@ class OauthController {
         Verifier verifier = extractVerifier(provider, params)
 
         if (!verifier) {
-            return redirect(uri: provider.failureUri)
+            redirect(uri: provider.failureUri)
+            return
         }
 
-        Token requestToken = (Token) session[oauthService.findSessionKeyForRequestToken(providerName)]
+        Token requestToken = session[oauthService.findSessionKeyForRequestToken(providerName)]
 
         if (!requestToken) {
             throw new MissingRequestTokenException(providerName)
@@ -69,7 +71,7 @@ class OauthController {
 
         session[oauthService.findSessionKeyForRequestToken(providerName)] = requestToken
         String url = oauthService.getAuthorizationUrl(providerName, requestToken)
-        
+
         return redirect(url: url)
     }
 

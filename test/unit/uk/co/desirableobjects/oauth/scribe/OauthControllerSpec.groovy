@@ -19,7 +19,7 @@ class OauthControllerSpec extends Specification {
 
     @Shared OauthProvider provider
     @Shared OAuthService service
-    
+
     def setup() {
 
         service = Mock(OAuthService)
@@ -27,7 +27,7 @@ class OauthControllerSpec extends Specification {
         controller.oauthService = Mock(OauthService)
 
     }
-    
+
     def 'If authenticate url is hit without a provider, an exception is thrown'() {
 
         when:

@@ -6,17 +6,17 @@ class Test10aApiImplementation extends DefaultApi10a {
 
     @Override
     String getRequestTokenEndpoint() {
-        return null  //To change body of implemented methods use File | Settings | File Templates.
+        return null
     }
 
     @Override
     String getAccessTokenEndpoint() {
-        return null  //To change body of implemented methods use File | Settings | File Templates.
+        return null
     }
 
     @Override
     String getAuthorizationUrl(org.scribe.model.Token token) {
-        return null  //To change body of implemented methods use File | Settings | File Templates.
+        return null
     }
 
 }
