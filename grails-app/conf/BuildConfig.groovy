@@ -24,11 +24,12 @@ grails.project.dependency.resolution = {
 
     plugins {
 
-        test ':spock:0.6'
-
-        build ':release:2.0.4', {
+        test ':spock:0.6', {
             export = false
         }
 
+        build(':release:2.2.0', ':rest-client-builder:1.0.3') {
+            export = false
+        }
     }
 }
