@@ -9,7 +9,7 @@ enum SupportedOauthVersion {
     private SupportedOauthVersion(String scribeVersion) {
         this.scribeVersion = scribeVersion
     }
-    
+
     static SupportedOauthVersion parse(String versionString) {
         return values().find { SupportedOauthVersion supportedVersion ->
             supportedVersion.scribeVersion == versionString

@@ -372,7 +372,7 @@ class OauthServiceSpec extends Specification {
         OAuthService createService(OAuthConfig oAuthConfig) {
             return null
         }
-        
+
     }
 
 }
