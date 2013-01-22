@@ -1,22 +1,20 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import uk.co.desirableobjects.oauth.scribe.exception.InvalidOauthProviderException
 import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 import org.scribe.builder.ServiceBuilder
-import org.scribe.oauth.OAuthService
 import org.scribe.exceptions.OAuthException
-import org.scribe.model.Token
-import org.scribe.model.Verifier
-import org.scribe.model.Verb
-import org.scribe.model.Response
 import org.scribe.model.SignatureType
+import org.scribe.model.Token
+import org.scribe.model.Verb
+import org.scribe.model.Verifier
+import org.scribe.oauth.OAuthService
+import org.springframework.beans.factory.InitializingBean
+
+import uk.co.desirableobjects.oauth.scribe.exception.InvalidOauthProviderException
+import uk.co.desirableobjects.oauth.scribe.exception.InvalidProviderClassException
 import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
 import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 import uk.co.desirableobjects.oauth.scribe.util.DynamicMethods
-import org.springframework.beans.factory.InitializingBean
-import uk.co.desirableobjects.oauth.scribe.exception.InvalidProviderClassException
-import org.scribe.model.OAuthRequest
-import java.util.concurrent.TimeUnit
 
 class OauthService implements InitializingBean {
 
@@ -160,21 +158,21 @@ class OauthService implements InitializingBean {
        if( name ==~ /^.*RequestToken/) {
 
            String provider = DynamicMethods.extractKeyword(name, /^get(.*)RequestToken/)
-           return this.getRequestToken(provider)
+           return getRequestToken(provider)
 
        }
 
        if( name ==~ /^.*AuthorizationUrl/) {
 
             String provider = DynamicMethods.extractKeyword(name, /^get(.*)AuthorizationUrl/)
-            return this.getAuthorizationUrl(provider, args[0])
+            return getAuthorizationUrl(provider, args[0])
 
        }
 
        if( name ==~ /^.*AccessToken/) {
 
             String provider = DynamicMethods.extractKeyword(name, /^get(.*)AccessToken/)
-            return this.getAccessToken(provider, args[0], args[1])
+            return getAccessToken(provider, args[0], args[1])
 
        }
 
@@ -186,8 +184,8 @@ class OauthService implements InitializingBean {
               Verb actualVerb = Verb.valueOf(verb.toUpperCase())
 
                ResourceAccessor resourceAccessor = new ResourceAccessor(
-                       connectTimeout: this.connectTimeout,
-                       receiveTimeout: this.receiveTimeout,
+                       connectTimeout: connectTimeout,
+                       receiveTimeout: receiveTimeout,
                        verb: actualVerb,
                        url: args[1] as String,
                        bodyParameters: (args.length > 2) ? args[2] as Map : null
@@ -211,8 +209,8 @@ class OauthService implements InitializingBean {
             OAuthService service = findService(serviceName)
 
             ResourceAccessor resourceAccessor = new ResourceAccessor(
-                    connectTimeout: this.connectTimeout,
-                    receiveTimeout: this.receiveTimeout,
+                    connectTimeout: connectTimeout,
+                    receiveTimeout: receiveTimeout,
                     verb: actualVerb,
                     url: args[1] as String,
                     payload: (args[2] as String).bytes,
@@ -223,7 +221,7 @@ class OauthService implements InitializingBean {
             return oauthResourceService.accessResource(service, args[0] as Token, resourceAccessor)
 
         }
-        throw new MissingMethodException(name, this.class, args)
+        throw new MissingMethodException(name, getClass(), args)
 
     }
 
@@ -232,7 +230,7 @@ class OauthService implements InitializingBean {
         return findProviderConfiguration(providerName).service
     }
 
-    public OauthProvider findProviderConfiguration(String providerName) {
+    OauthProvider findProviderConfiguration(String providerName) {
 
         if (!services.containsKey(providerName)) {
             throw new UnknownProviderException(providerName)

@@ -1,17 +1,18 @@
 package uk.co.desirableobjects.oauth.scribe
 
+import java.util.concurrent.TimeUnit
+
+import org.scribe.model.OAuthRequest
+import org.scribe.model.Response
 import org.scribe.model.Token
 import org.scribe.model.Verb
-import org.scribe.model.OAuthRequest
 import org.scribe.oauth.OAuthService
-import org.scribe.model.Response
-import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 
-import java.util.concurrent.TimeUnit
+import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 
 class OauthResourceService {
 
-    static def transactional = false
+    static transactional = false
 
     Response accessResource(OAuthService service, Token accessToken, ResourceAccessor ra) {
 

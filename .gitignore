@@ -1,4 +1,3 @@
-*.tld
 .idea
 .classpath
 .project
@@ -11,7 +10,5 @@ plugin.xml
 *.zip
 target
 out
-web-app/images
-web-app/css
-web-app/js
+web-app
 grails-app/i18n

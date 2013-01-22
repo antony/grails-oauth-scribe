@@ -4,12 +4,6 @@ class OauthGrailsPlugin {
 
     def grailsVersion = "1.3.1 > *"
 
-    def dependsOn = [:]
-
-    def pluginExcludes = [
-            "grails-app/views/error.gsp"
-    ]
-
     def author = "Antony Jones, Peter Ledbrook"
     def authorEmail = "aj#desirableobjects.co.uk"
     def title = "Oauth Plugin"
