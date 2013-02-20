@@ -27,7 +27,7 @@ class OauthTagLib {
     	String provider = attrs.provider
 
         if (!provider) {
-            throw new GrailsTagException('No provider specified for <oauth:connect /> tag. Try <oauth:connect provider="your-provider-name" />')
+            throw new GrailsTagException('No provider specified for <oauth:connected /> tag. Try <oauth:connected provider="your-provider-name" />')
         }
 
         String sessionKey = oauthService.findSessionKeyForAccessToken(provider)
@@ -44,7 +44,7 @@ class OauthTagLib {
      	String provider = attrs.provider
 
         if (!provider) {
-            throw new GrailsTagException('No provider specified for <oauth:connect /> tag. Try <oauth:connect provider="your-provider-name" />')
+            throw new GrailsTagException('No provider specified for <oauth:disconnected /> tag. Try <oauth:disconnected provider="your-provider-name" />')
         }
 
         String sessionKey = oauthService.findSessionKeyForAccessToken(provider)
