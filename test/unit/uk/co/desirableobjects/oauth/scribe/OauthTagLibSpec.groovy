@@ -38,11 +38,119 @@ class OauthTagLibSpec extends Specification {
 
     }
 
+    def 'an oauth connected tag body is rendered when token in session'() {
+
+        given:
+
+            tagLib.oauthService = new OauthService()
+            tagLib.oauthService.findSessionKeyForAccessToken('twitter') >> { return 'twitter:oasAccessToken' }
+
+        and: 
+
+            tagLib.session['twitter:oasAccessToken'] = new Token('a', 'b', 'c')
+
+        when:
+
+            def output = tagLib.connected([provider:'twitter'], { 'Connected content' } )
+
+        then:
+
+            output == 'Connected content'
+
+    }
+
+    def 'an oauth connected tag body is NOT rendered when token does not exist in session'() {
+
+        given:
+
+            tagLib.oauthService = new OauthService()
+            tagLib.oauthService.findSessionKeyForAccessToken('twitter') >> { return 'twitter:oasAccessToken' }
+
+        and: 
+
+            tagLib.session['twitter:oasAccessToken'] = null
+
+        when:
+
+            def output = tagLib.connected([provider:'twitter'], { 'Connected content' } )
+
+        then:
+
+            output == ''
+
+    }
+
+    def 'an oauth disconnected tag body is NOT rendered when token in session'() {
+
+        given:
+
+            tagLib.oauthService = new OauthService()
+            tagLib.oauthService.findSessionKeyForAccessToken('twitter') >> { return 'twitter:oasAccessToken' }
+
+        and: 
+
+            tagLib.session['twitter:oasAccessToken'] = new Token('a', 'b', 'c')
+
+        when:
+
+            def output = tagLib.disconnected([provider:'twitter'], { 'Disconnected content' } )
+
+        then:
+
+            output == ''
+
+    }
+
+    def 'an oauth disconnected tag body is rendered when token does not exist in session'() {
+
+        given:
+
+            tagLib.oauthService = new OauthService()
+            tagLib.oauthService.findSessionKeyForAccessToken('twitter') >> { return 'twitter:oasAccessToken' }
+
+        and: 
+
+            tagLib.session['twitter:oasAccessToken'] = null
+
+        when:
+
+            def output = tagLib.disconnected([provider:'twitter'], { 'Disconnected content' } )
+
+        then:
+
+            output == 'Disconnected content'
+
+    }
+
     def 'an oauth link tag fails if provider is not specified'() {
 
         when:
 
             tagLib.connect([:], { 'Click here to authorise' } )
+
+        then:
+
+            thrown GrailsTagException
+
+    }
+
+    def 'an oauth connected tag fails if provider is not specified'() {
+
+        when:
+
+            tagLib.connected([:], { 'Connected content' } )
+
+        then:
+
+            thrown GrailsTagException
+
+    }
+
+    def 'an oauth disconnected tag fails if provider is not specified'() {
+
+        when:
+
+            tagLib.disconnected([:], { 'Disconnected content' } )
 
         then:
 
