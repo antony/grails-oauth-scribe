@@ -3,8 +3,8 @@ package uk.co.desirableobjects.oauth.scribe
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 import org.scribe.model.Token
 import org.scribe.model.Verifier
-
 import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
+import uk.co.desirableobjects.oauth.scribe.holder.RedirectHolder
 
 class OauthController {
 
@@ -72,6 +72,7 @@ class OauthController {
         session[oauthService.findSessionKeyForRequestToken(providerName)] = requestToken
         String url = oauthService.getAuthorizationUrl(providerName, requestToken)
 
+        RedirectHolder.setUri(params.redirectUrl)
         return redirect(url: url)
     }
 
