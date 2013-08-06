@@ -3,7 +3,7 @@ package uk.co.desirableobjects.oauth.scribe.holder
 import org.springframework.web.context.request.RequestContextHolder
 
 /**
- * User: alkaloid
+ * User: AlekseyLeshko
  * Date: 22/07/13
  * Time: 19:27
  * To change this template use File | Settings | File Templates.
