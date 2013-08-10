@@ -14,7 +14,7 @@ class OauthTagLib {
             throw new GrailsTagException('No provider specified for <oauth:connect /> tag. Try <oauth:connect provider="your-provider-name" />')
         }
 
-        Map a = attrs + [url: [controller: 'oauth', action: 'authenticate', params: [provider: provider]]]
+        Map a = attrs + [url: [controller: 'oauth', action: 'authenticate', params: [provider: provider, redirectUrl: attrs.redirectUrl]]]
         out << g.link(a, body)
 
     }

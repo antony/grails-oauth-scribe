@@ -76,6 +76,7 @@ class OauthController {
 
         RedirectHolder.setUri(params.redirectUrl)
         return redirect(url: url)
+
     }
 
 }
