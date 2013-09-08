@@ -66,14 +66,12 @@ class OauthController {
         OauthProvider provider = oauthService.findProviderConfiguration(providerName)
 
         Token requestToken = EMPTY_TOKEN
-	    String callback
+
         if (provider.oauthVersion == SupportedOauthVersion.ONE) {
             requestToken = provider.service.requestToken
-	        Map providerConf = grailsApplication.config.oauth.providers."${providerName}"
 
-	        callback = providerConf.containsKey('callback') ? providerConf.callback : null
-	        if(callback) {
-		         String callbackParam = "oauth_callback=" + callback.encodeAsURL()
+	        if(provider.callback) {
+		         String callbackParam = "oauth_callback=" + provider.callback.encodeAsURL()
 		         String token = requestToken.token + "&" + callbackParam
 		         requestToken = new Token(token, requestToken.secret, requestToken.rawResponse)
 	        }
