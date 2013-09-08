@@ -56,6 +56,10 @@ class OauthController {
 
     private String determineVerifierKey(OauthProvider provider) {
 
+	    if("dropbox".equalsIgnoreCase(params.provider)) {
+		    return 'oauth_token'
+	    }
+
         return SupportedOauthVersion.TWO == provider.oauthVersion ? 'code' : 'oauth_verifier'
 
     }
@@ -66,19 +70,21 @@ class OauthController {
         OauthProvider provider = oauthService.findProviderConfiguration(providerName)
 
         Token requestToken = EMPTY_TOKEN
-
+	    Token reqToken
         if (provider.oauthVersion == SupportedOauthVersion.ONE) {
             requestToken = provider.service.requestToken
 
 	        if(provider.callback) {
 		         String callbackParam = "oauth_callback=" + provider.callback.encodeAsURL()
 		         String token = requestToken.token + "&" + callbackParam
-		         requestToken = new Token(token, requestToken.secret, requestToken.rawResponse)
+		         reqToken = new Token(token, requestToken.secret, requestToken.rawResponse)
+	        } else {
+		        reqToken = requestToken
 	        }
         }
 
         session[oauthService.findSessionKeyForRequestToken(providerName)] = requestToken
-        String url = oauthService.getAuthorizationUrl(providerName, requestToken)
+        String url = oauthService.getAuthorizationUrl(providerName, reqToken)
 
         return redirect(url: url)
     }
