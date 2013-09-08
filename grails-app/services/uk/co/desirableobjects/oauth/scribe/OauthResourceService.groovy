@@ -17,7 +17,9 @@ class OauthResourceService {
     Response accessResource(OAuthService service, Token accessToken, ResourceAccessor ra) {
 
         OAuthRequest req = buildOauthRequest(ra.verb, ra.url, ra.connectTimeout, ra.receiveTimeout)
-        req.addPayload(ra.payload)
+	    if(ra.payload) {
+            req.addPayload(ra.payload)
+	    }
         ra.headers.each { String name, String value ->
             req.addHeader(name, value)
         }
