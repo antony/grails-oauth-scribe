@@ -107,7 +107,8 @@ class OauthService implements InitializingBean {
                 OauthProvider provider = new OauthProvider(
                     service: serviceBuilder.build(),
                     successUri: providerConfig.successUri,
-                    failureUri: providerConfig.failureUri
+                    failureUri: providerConfig.failureUri,
+		            callback: grailsApplication.config.grails.serverURL + providerConfig.callback
                 )
 
                 services.put(name, provider)

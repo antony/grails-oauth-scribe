@@ -6,6 +6,7 @@ class OauthProvider {
 
     String successUri
     String failureUri
+	String callback
 
     OAuthService service
 
