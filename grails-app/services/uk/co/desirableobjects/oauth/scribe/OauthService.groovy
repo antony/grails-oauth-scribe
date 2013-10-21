@@ -182,6 +182,7 @@ class OauthService implements InitializingBean {
               String verb = (String) m[0][1]
               String serviceName = (String) m[0][2].toString().toLowerCase()
               Verb actualVerb = Verb.valueOf(verb.toUpperCase())
+              OAuthService service = findService(serviceName)
 
                ResourceAccessor resourceAccessor = new ResourceAccessor(
                        connectTimeout: connectTimeout,
@@ -195,7 +196,7 @@ class OauthService implements InitializingBean {
                     resourceAccessor.headers.putAll(args[3] as Map<String, String>)
                }
 
-               return oauthResourceService.accessResource(findService(serviceName), args[0] as Token, resourceAccessor)
+               return oauthResourceService.accessResource(service, args[0] as Token, resourceAccessor)
 
        }
 
@@ -221,6 +222,7 @@ class OauthService implements InitializingBean {
             return oauthResourceService.accessResource(service, args[0] as Token, resourceAccessor)
 
         }
+
         throw new MissingMethodException(name, getClass(), args)
 
     }
