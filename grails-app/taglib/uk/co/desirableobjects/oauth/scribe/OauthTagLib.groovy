@@ -4,6 +4,9 @@ import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 import org.scribe.model.Token
 
 class OauthTagLib {
+
+    static namespace = 'oauth'
+
     OauthService oauthService
 
     def connect = { attrs, body ->
