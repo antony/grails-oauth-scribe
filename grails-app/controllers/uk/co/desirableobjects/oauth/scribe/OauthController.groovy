@@ -1,9 +1,9 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 import org.scribe.model.Token
 import org.scribe.model.Verifier
-
+import uk.co.desirableobjects.oauth.scribe.holder.RedirectHolder
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
 
 class OauthController {
@@ -24,7 +24,9 @@ class OauthController {
             return
         }
 
-        Token requestToken = session[oauthService.findSessionKeyForRequestToken(providerName)]
+        Token requestToken = provider.oauthVersion == SupportedOauthVersion.TWO ?
+            new Token(params?.code, "") :
+            (Token) session[oauthService.findSessionKeyForRequestToken(providerName)]
 
         if (!requestToken) {
             throw new MissingRequestTokenException(providerName)
@@ -72,7 +74,9 @@ class OauthController {
         session[oauthService.findSessionKeyForRequestToken(providerName)] = requestToken
         String url = oauthService.getAuthorizationUrl(providerName, requestToken)
 
+        RedirectHolder.setUri(params.redirectUrl)
         return redirect(url: url)
+
     }
 
 }

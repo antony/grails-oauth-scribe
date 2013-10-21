@@ -1,14 +1,16 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import org.scribe.model.Token
-import org.scribe.model.Verifier
-import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
-import org.scribe.oauth.OAuthService
-import grails.test.mixin.TestFor
-import spock.lang.Specification
-import spock.lang.Shared
-import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
 import spock.lang.Unroll
+import spock.lang.Shared
+import grails.test.mixin.TestFor
+import org.scribe.model.Token
+import spock.lang.Specification
+import org.scribe.model.Verifier
+import org.scribe.oauth.OAuthService
+import uk.co.desirableobjects.oauth.scribe.holder.RedirectHolder
+import org.springframework.web.context.request.RequestContextHolder
+import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
+import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
 
 @TestFor(OauthController)
 class OauthControllerSpec extends Specification {
@@ -112,10 +114,31 @@ class OauthControllerSpec extends Specification {
             controller.oauthService.getAuthorizationUrl(PROVIDER_NAME, requestToken) >> { return 'http://authorisation.url/auth' }
 
         and:
-
+            RedirectHolder.getRedirect() == RedirectHolder.getDefaultRedirect()
             session[REQUEST_TOKEN_SESSION_KEY] == requestToken
             controller.response.redirectUrl == 'http://authorisation.url/auth'
 
+    }
+
+    def 'Authentication endpoint is hit with valid redirect uri'() {
+        def redirectUri = "/controller/action/id"
+
+        given:
+            def requestToken = new Token('a', 'b', 'c')
+            service.getRequestToken() >> { return requestToken }
+            controller.params.redirectUrl = redirectUri
+        when:
+            controller.params.provider = PROVIDER_NAME
+            controller.authenticate()
+        then:
+            controller.oauthService.findProviderConfiguration(PROVIDER_NAME) >> { return provider }
+            controller.oauthService.findSessionKeyForRequestToken(PROVIDER_NAME) >> { return REQUEST_TOKEN_SESSION_KEY }
+            provider.service.version >> { return '1.0' }
+            controller.oauthService.getAuthorizationUrl(PROVIDER_NAME, requestToken) >> { return 'http://authorisation.url/auth' }
+        and:
+            RedirectHolder.getRedirect().get(RedirectHolder.URI_NAME) == redirectUri
+            session[REQUEST_TOKEN_SESSION_KEY] == requestToken
+            controller.response.redirectUrl == 'http://authorisation.url/auth'
     }
 
     def 'In Oauth 2, request token endpoint is not hit'() {
@@ -136,6 +159,7 @@ class OauthControllerSpec extends Specification {
             controller.oauthService.getAuthorizationUrl(PROVIDER_NAME, emptyToken) >> { return 'http://authorisation.url/auth' }
 
         and:
+            RedirectHolder.getRedirect() == RedirectHolder.getDefaultRedirect()
             session[REQUEST_TOKEN_SESSION_KEY] == emptyToken
             controller.response.redirectUrl == 'http://authorisation.url/auth'
 
@@ -166,7 +190,145 @@ class OauthControllerSpec extends Specification {
 
     }
 
-        // TODO: {"error":{"message":"Error validating client secret.","type":"OAuthException"}}
-    // TODO: Catch and deal with timeouts in a sensible way.
+    def 'RedirectHolder execute the method setUri(), set valid uri'() {
+        def redirectUri = "http://test.com"
 
+        when:
+            RedirectHolder.setUri(redirectUri)
+        then:
+            def hash = RequestContextHolder.currentRequestAttributes()?.getSession()?.getAttribute(RedirectHolder.HASH_NAME)
+            def uri = hash.get(RedirectHolder.URI_NAME)
+            uri == redirectUri
+    }
+
+    def 'RedirectHolder execute the method setUri(), set valid uri with empty hash in session'() {
+        def redirectUri = "http://test.com"
+
+        given:
+            def currentSession = RequestContextHolder.currentRequestAttributes()?.getSession()
+            currentSession.putAt(RedirectHolder.HASH_NAME, [:])
+        when:
+            RedirectHolder.setUri(redirectUri)
+        then:
+            def hash = RequestContextHolder.currentRequestAttributes()?.getSession()?.getAttribute(RedirectHolder.HASH_NAME)
+            def uri = hash.get(RedirectHolder.URI_NAME)
+            uri == redirectUri
+    }
+
+    def 'RedirectHolder execute the method setUri(), set valid uri with custom hash in session'() {
+        def redirectUri = "http://test.com"
+        def testContent = "Test content"
+
+        given:
+            def currentSession = RequestContextHolder.currentRequestAttributes()?.getSession()
+            currentSession.putAt(RedirectHolder.HASH_NAME, [testContent: testContent])
+        when:
+            RedirectHolder.setUri(redirectUri)
+        then:
+            def hash = RequestContextHolder.currentRequestAttributes()?.getSession()?.getAttribute(RedirectHolder.HASH_NAME)
+            def uri = hash.get(RedirectHolder.URI_NAME)
+            uri == redirectUri
+    }
+
+    def 'RedirectHolder execute the method setUri(), set invalid uri'() {
+        def invalidRedirectUri = ""
+
+        when:
+        RedirectHolder.setUri(invalidRedirectUri)
+        then:
+        RequestContextHolder.currentRequestAttributes()?.getSession()?.getAttribute(RedirectHolder.HASH_NAME) == null
+        RedirectHolder.getRedirect() == RedirectHolder.getDefaultRedirect()
+    }
+
+    def 'RedirectHolder execute the method getRedirect(), return valid hash'() {
+        def redirectUri = "http://test.com"
+        def hash = [:]
+        hash.put(RedirectHolder.URI_NAME, redirectUri)
+
+        given:
+            RedirectHolder.setUri(redirectUri)
+        when:
+            def ex = RedirectHolder.getRedirect()
+        then:
+            ex == hash
+    }
+
+    def 'RedirectHolder execute the method getRedirect(), return redirect with custom uri'() {
+        def redirectUri = "http://test.com"
+        def hash = [:]
+        hash.put(RedirectHolder.URI_NAME, redirectUri)
+
+        given:
+            RedirectHolder.setUri(redirectUri)
+        when:
+            def ex = RedirectHolder.getRedirect()
+        then:
+            ex == hash
+    }
+
+    def 'RedirectHolder execute the method getRedirect(), return default result'() {
+        when:
+            def ex = RedirectHolder.getRedirect()
+        then:
+            ex == RedirectHolder.getDefaultRedirect()
+    }
+
+    def 'RedirectHolder execute the method setRedirectHash(), set valid hash'() {
+        def hash = [:]
+        hash.put("controller", "object")
+        hash.put("action", "show")
+        hash.put("id", "1")
+
+        when:
+            RedirectHolder.setRedirectHash(hash)
+        then:
+            hash == RedirectHolder.getOrCreateRedirectHash()
+    }
+
+    def 'RedirectHolder execute the method setRedirectHash(), set invalid hash'() {
+        when:
+            RedirectHolder.setRedirectHash(null)
+        then:
+            RedirectHolder.getRedirect() == RedirectHolder.getDefaultRedirect()
+    }
+
+    def 'RedirectHolder execute the method getStorage(), return current session'() {
+        when:
+            def ex = RedirectHolder.getStorage()
+        then:
+            ex == RequestContextHolder.currentRequestAttributes()?.getSession()
+    }
+
+    def 'RedirectHolder execute the method getOrCreateRedirectHash(), return empty hash'() {
+        when:
+            def ex = RedirectHolder.getOrCreateRedirectHash()
+        then:
+            ex == [:]
+    }
+
+    def 'RedirectHolder execute the method getOrCreateRedirectHash(), return custom hash'() {
+        def testContent = "Test content"
+        def hash = [testContent: testContent]
+
+        given:
+            def currentSession = RequestContextHolder.currentRequestAttributes()?.getSession()
+            currentSession.putAt(RedirectHolder.HASH_NAME, hash)
+        when:
+            def ex = RedirectHolder.getOrCreateRedirectHash()
+        then:
+            ex == hash
+    }
+
+    def 'RedirectHolder execute the method getDefaultRedirect(), return default redirect hash'() {
+        given:
+            def redirectHash = [:]
+            redirectHash.put(RedirectHolder.URI_NAME, RedirectHolder.DEFAULT_URI)
+        when:
+            def ex = RedirectHolder.getDefaultRedirect()
+        then:
+            ex == redirectHash
+    }
+
+    // TODO: {"error":{"message":"Error validating client secret.","type":"OAuthException"}}
+    // TODO: Catch and deal with timeouts in a sensible way.
 }
