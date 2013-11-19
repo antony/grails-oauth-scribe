@@ -31,9 +31,16 @@ class OauthController {
         if (!requestToken) {
             throw new MissingRequestTokenException(providerName)
         }
+        
+        Token accessToken
 
-        Token accessToken = oauthService.getAccessToken(providerName, requestToken, verifier)
-
+        try {
+            accessToken = oauthService.getAccessToken(providerName, requestToken, verifier)
+        } catch(OAuthException){
+            log.error("Cannot authenticate with oauth")
+            return redirect(uri: provider.failureUri)
+        }
+        
         session[oauthService.findSessionKeyForAccessToken(providerName)] = accessToken
         session.removeAttribute(oauthService.findSessionKeyForRequestToken(providerName))
 
