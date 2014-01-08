@@ -12,7 +12,7 @@ class OauthController {
 
     OauthService oauthService
 
-    def callback = {
+    def callback() {
 
         String providerName = params.provider
         OauthProvider provider = oauthService.findProviderConfiguration(providerName)
@@ -68,7 +68,7 @@ class OauthController {
 
     }
 
-    def authenticate = {
+    def authenticate() {
 
         String providerName = params.provider
         OauthProvider provider = oauthService.findProviderConfiguration(providerName)
