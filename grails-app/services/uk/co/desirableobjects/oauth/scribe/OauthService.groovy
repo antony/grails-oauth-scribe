@@ -223,7 +223,31 @@ class OauthService implements InitializingBean {
 
         }
 
-        throw new MissingMethodException(name, getClass(), args)
+	    def querystringParamsMethodSuffix = "ResourceWithQuerystringParams"
+	    if( name ==~ /^(get|put|post|delete|options|head).*${querystringParamsMethodSuffix}/) {
+
+		    def m = name =~ /^(get|put|post|delete|options|head)(.*)${querystringParamsMethodSuffix}/
+		    String verb = (String) m[0][1]
+		    String serviceName = (String) m[0][2].toString().toLowerCase()
+
+		    Verb actualVerb = Verb.valueOf(verb.toUpperCase())
+		    OAuthService service = findService(serviceName)
+
+		    ResourceAccessor resourceAccessor = new ResourceAccessor(
+				    connectTimeout: connectTimeout,
+				    receiveTimeout: receiveTimeout,
+				    verb: actualVerb,
+				    url: args[1] as String,
+				    querystringParams: (args.length > 2) ? args[2] as Map<String, String> : null
+		    )
+
+		    resourceAccessor.headers.putAll(args[3] as Map<String, String>)
+
+		    return oauthResourceService.accessResource(service, args[0] as Token, resourceAccessor)
+
+	    }
+
+	    throw new MissingMethodException(name, getClass(), args)
 
     }
 

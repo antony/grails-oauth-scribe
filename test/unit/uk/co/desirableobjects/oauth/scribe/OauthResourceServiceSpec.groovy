@@ -75,5 +75,40 @@ class OauthResourceServiceSpec extends Specification {
                 0 * _
 
         }
-          
+
+		def 'querystring parameters should be correctly added to a request when available'() {
+
+			given:
+				OAuthService theParent = Mock(OAuthService)
+				Token aToken = new Token('token', 'secret')
+
+			when: "the resource accessor has querystring parameters"
+				def resourceAccessor = new ResourceAccessor()
+				resourceAccessor.with {
+					verb                = Verb.GET
+					url                 = 'http://example.net/res'
+					querystringParams   = ["value1": "firstValue", "value2": "secondValue"]
+				}
+				service.accessResource(theParent, aToken, resourceAccessor)
+
+			then: "the parent signs a request with the correct querystring params"
+				1 * theParent.signRequest(_ as Token, { OAuthRequest req ->
+					req.queryStringParams.asFormUrlEncodedString() == "value1=firstValue&value2=secondValue"
+				} as OAuthRequest)
+
+			when: "the resource accessor has no querystring parameters"
+				resourceAccessor = new ResourceAccessor()
+				resourceAccessor.with {
+					verb = Verb.GET
+					url = 'http://example.net/res'
+				}
+				service.accessResource(theParent, aToken, resourceAccessor)
+
+			then: "the parent signs a request without any querystring params"
+				1 * theParent.signRequest(_ as Token, { OAuthRequest req ->
+					req.queryStringParams.size() == 0
+				} as OAuthRequest)
+
+		}
+
 }
