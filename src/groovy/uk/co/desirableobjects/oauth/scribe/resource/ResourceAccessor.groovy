@@ -14,6 +14,7 @@ class ResourceAccessor {
     byte[] payload
     Map<String, String> headers = [:]
     Map<String, String> bodyParameters = [:]
+	Map<String, String> querystringParams = [:]
 
     void setPayload(byte[] data) {
         headers.put('Content-Length', data.length as String)

@@ -361,6 +361,38 @@ class OauthServiceSpec extends Specification {
 
     }
 
+	def "service correctly handles ResourceWithQuerystringParameters methods"() {
+
+		given: "our service"
+			OauthService service = new OauthService()
+			OauthResourceService oauthResourceService = Mock(OauthResourceService)
+			service.oauthResourceService = oauthResourceService
+		and: "a mock provider"
+			OauthProvider aProvider = Mock(OauthProvider)
+			OAuthService theProviderService = Mock(OAuthService)
+			aProvider.getService() >> theProviderService
+			service.services = [twitter: aProvider]
+		and: "the input parameters"
+			def theToken = new Token("a", "b")
+			def theUrl = "http://someapi.net/api"
+			def theQuerystringParams = [param1:"value1", param2:"value2"]
+			def theExtraHeaders = [header1:"valueA", header2:"valueB"]
+
+		when: "using the dynamic method"
+			service.getTwitterResourceWithQuerystringParams(theToken, theUrl, theQuerystringParams, theExtraHeaders)
+
+		then: "the dynamic method is correctly identified"
+			notThrown MissingMethodException
+		and: "the service delegates correctly"
+			1 * oauthResourceService.accessResource(theProviderService, theToken, { resourceAccessor ->
+				resourceAccessor.verb               == Verb.POST
+				resourceAccessor.url                == theUrl
+				resourceAccessor.headers            == theExtraHeaders
+				resourceAccessor.querystringParams  == theQuerystringParams
+			} as ResourceAccessor)
+
+	}
+
     // TODO: What if a dynamic provider requestToken, accessToken etc provider name is not known?
 
     class InvalidProviderApi {

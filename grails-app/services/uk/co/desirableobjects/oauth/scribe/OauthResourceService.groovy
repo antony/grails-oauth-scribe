@@ -27,6 +27,9 @@ class OauthResourceService {
         ra.bodyParameters?.each {String k, String v->
             req.addBodyParameter(k, v)
         }
+	    ra.querystringParams?.each {String name, String value ->
+		    req.addQuerystringParameter(name, value)
+	    }
         return signAndSend(service, accessToken, req)
 
     }
