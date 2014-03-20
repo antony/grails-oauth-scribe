@@ -1,6 +1,5 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import grails.plugin.spock.UnitSpec
 import org.scribe.model.Token
 import org.scribe.model.Verb
 import uk.co.desirableobjects.oauth.scribe.exception.InvalidOauthProviderException

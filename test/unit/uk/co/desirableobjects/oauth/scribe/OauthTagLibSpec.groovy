@@ -1,6 +1,5 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import grails.plugin.spock.TagLibSpec
 import org.gmock.WithGMock
 import org.scribe.model.Token
 import org.scribe.model.Verifier
