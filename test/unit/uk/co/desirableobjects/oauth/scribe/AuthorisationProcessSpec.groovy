@@ -8,7 +8,6 @@ import spock.lang.Stepwise
 import org.scribe.model.Token
 import spock.lang.Shared
 import org.scribe.oauth.OAuthService
-import grails.plugin.spock.UnitSpec
 import org.scribe.model.Verifier
 
 import org.scribe.model.Verb
