@@ -1,21 +1,16 @@
 package uk.co.desirableobjects.oauth.scribe
 
+import grails.test.mixin.TestFor
+import org.scribe.builder.ServiceBuilder
+import org.scribe.builder.api.Api
+import org.scribe.builder.api.TwitterApi
+import org.scribe.model.OAuthConfig
 import org.scribe.model.Token
 import org.scribe.model.Verb
-import uk.co.desirableobjects.oauth.scribe.exception.InvalidOauthProviderException
-import org.scribe.builder.api.Api
 import org.scribe.oauth.OAuthService
-import org.scribe.model.OAuthConfig
-import org.scribe.builder.api.TwitterApi
-
-import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import org.scribe.builder.ServiceBuilder
-import org.codehaus.groovy.grails.web.servlet.mvc.exceptions.InvalidUriException
-import org.springframework.beans.factory.BeanCreationException
-import grails.test.mixin.TestFor
+import uk.co.desirableobjects.oauth.scribe.exception.InvalidOauthProviderException
 import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 
 // This is a horrible hack. To disable automatic mocking and wiring of the

@@ -1,17 +1,17 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import org.scribe.exceptions.OAuthException
-import spock.lang.Unroll
-import spock.lang.Shared
 import grails.test.mixin.TestFor
+import org.scribe.exceptions.OAuthException
 import org.scribe.model.Token
-import spock.lang.Specification
 import org.scribe.model.Verifier
 import org.scribe.oauth.OAuthService
-import uk.co.desirableobjects.oauth.scribe.holder.RedirectHolder
 import org.springframework.web.context.request.RequestContextHolder
-import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
+import spock.lang.Shared
+import spock.lang.Specification
+import spock.lang.Unroll
 import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
+import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
+import uk.co.desirableobjects.oauth.scribe.holder.RedirectHolder
 
 @TestFor(OauthController)
 class OauthControllerSpec extends Specification {

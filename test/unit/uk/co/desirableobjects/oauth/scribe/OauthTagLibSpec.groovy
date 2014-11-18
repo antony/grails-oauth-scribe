@@ -1,12 +1,9 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import org.gmock.WithGMock
-import org.scribe.model.Token
-import org.scribe.model.Verifier
-import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 import grails.test.mixin.TestFor
-import spock.lang.Specification
 import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
+import org.scribe.model.Token
+import spock.lang.Specification
 
 @TestFor(OauthTagLib)
 class OauthTagLibSpec extends Specification {

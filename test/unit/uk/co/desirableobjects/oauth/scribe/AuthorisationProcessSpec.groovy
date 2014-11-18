@@ -2,17 +2,14 @@ package uk.co.desirableobjects.oauth.scribe
 
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import org.scribe.builder.api.TwitterApi
+import org.scribe.model.Response
+import org.scribe.model.Token
+import org.scribe.model.Verifier
+import org.scribe.oauth.OAuthService
+import org.springframework.http.HttpStatus
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
-import org.scribe.model.Token
-import spock.lang.Shared
-import org.scribe.oauth.OAuthService
-import org.scribe.model.Verifier
-
-import org.scribe.model.Verb
-import org.scribe.model.Response
-import org.springframework.http.HttpStatus
 import spock.lang.Unroll
 import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
 import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
