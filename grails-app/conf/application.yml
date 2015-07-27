@@ -18,6 +18,10 @@ oauth:
 
 ---
 grails:
+    doc:
+        title: "Oauth Plugin"
+        subtitle: "Provides OAuth integration for Grails, using the Scribe framework"
+        authors: "Antony Jones, Peter Ledbrook"
     mime:
         disable:
             accept:

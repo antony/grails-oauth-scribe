@@ -1,4 +1,5 @@
-grails-oauth vesion 2.x is a ground-up rewrite of the previous plugin (< 1.x), with a number of small differences in its set-up.
+grails-oauth version 2.x is a an upgrade to Grails 3.
+grails-oauth version 2.x is a ground-up rewrite of the previous plugin (< 1.x), with a number of small differences in its set-up.
 
 This quick guide will attempt to make the transition as seamless as possible.
 
