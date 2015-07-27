@@ -6,8 +6,8 @@ jdk:
 
 before_script:
     - chmod +x grailsw
-    - ./grailsw clean
-    - ./grailsw refresh-dependencies
-    - ./grailsw compile
+    - ./grails clean
+    - ./grails refresh-dependencies
+    - ./grails compile
 
-script: ./grailsw test-app
+script: ./grails test-app
