@@ -27,10 +27,8 @@ class MyClass {
     OauthService oauthService // or new OauthService() would work if you're not in a spring-managed class.
 
     Token getToken() {
-
         String sessionKey = oauthService.findSessionKeyForAccessToken('twitter')
         return session[sessionKey]
-
     }
 }
 {code}
@@ -62,11 +60,9 @@ The convention used for accessing resources is @OauthService.<method><provider>R
 In the above example:
 
 {table}
-*component* | *description*
-*method* | is the HTTP method used, one of put, post, get, delete, head, or options.
-*url* | is the url of the oauth-protected resource you are trying to access.
-*provider* | is the provider name configured in your oauth configuration.
-*accessToken* | is the access token you were given (via the session) when the user authenticated themselves with the provider.
+*component*     | *description*
+*method*        | is the HTTP method used, one of put, post, get, delete, head, or options.
+*url*           | is the url of the oauth-protected resource you are trying to access.
+*provider*      | is the provider name configured in your oauth configuration.
+*accessToken*   | is the access token you were given (via the session) when the user authenticated themselves with the provider.
 {table}
-
-
