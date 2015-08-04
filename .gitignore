@@ -1,14 +1,14 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Gradle template
+.gradle
+build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+
+/*.iml
 .idea
-.classpath
-.project
-settings.xml
-.settings
-*.iml
-*.iws
-*.ipr
-plugin.xml
-*.zip
-target
-out
-web-app
-grails-app/i18n

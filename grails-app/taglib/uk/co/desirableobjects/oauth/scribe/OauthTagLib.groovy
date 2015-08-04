@@ -1,6 +1,6 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
+import org.grails.taglib.GrailsTagException
 import org.scribe.model.Token
 
 class OauthTagLib {

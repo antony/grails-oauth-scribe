@@ -1,65 +1,86 @@
 h1. Install the plugin
 
-Installing the plugin can be done in one of two ways:
+{note}
+This version of the plugin is compatible with apps built with Grails 3 and above. This plugin uses OAuth scribe v1.3.7.
+{note}
 
-h2. Installing the plugin using the Grails dependency DSL (Recommended)
+This plugin can be installed by specifying the dependency in app's @build.gradle@.
 
-In @BuildConfig.groovy@, add the dependency to your 'plugins' section:
+h2. Adding as Gradle build dependency
+
+In @build.gradle@, add the dependency to your 'plugins' section:
 {code}
-    plugins {
-        ...
-        compile ':oauth:1.0'
-        ...
-    }
+dependencies {
+    ....
+    compile 'org.grails.plugins:oauth:3.0.0'
+    ...
+}
 {code}
 
 {note}
-Note that the version (1.0 in the example above) should be change to refelect the version you would like to use.
+Note that the version (3.0.0 in the example above) should be changed to reflect the version you would like to use.
 {note}
-
-h2. Installing the plugin 'on-the-fly':
-
-Simply run the command @grails install-plugin oauth@. Note that this will install the latest version into the global scope, rather than the compile scope which is slightly cleaner, above.
 
 h1. Configure the plugin
 
 Before the plugin can work, it requires at least one provider to be configured. The following is the minimal configuration you can get away with:
 
-In @Config.groovy@
+In @application.yml@
 {code}
-    oauth {
-        providers {
-            twitter {
-                api = TwitterApi
-                key = 'my-key'
-                secret = 'my-secret'
-            }
-        }
-    }
+oauth:
+    providers:
+        twitter:
+            api: org.scribe.builder.api.TwitterApi
+            key: my-key
+            secret: my-secret
 {code}
-
-In this example, @twitter@ is the provider name you will use within your application. @api@ is the scribe provider class which relates to the oauth service you are trying to connect to, and is a subclass of @OauthService@. It can be anything you want. @key@ is the oauth-key you have been given by your provider and @secret@ is the oauth-secret you have been given by your provider. You will need to import this into your @Config.groovy@ file using the standard java @import@ keyword.
 
 {note}
-Note that provider names are all lowercase - you don't necessarily need to lowercase them in your configuration, but when referencing them within the application, they have been lowercased for you. This means that 'MyProvider' becomes 'myprovider'.
+You have to specify the fully qualified class name of the api when using @application.yml@.
+@org.scribe.builder.api.TwitterApi@ instead of @TwitterApi@. Same is applicable for other providers (Facebook, Google, DropBox, etc)
+{note}
+
+In @application.groovy@
+{code}
+import org.scribe.builder.api.TwitterApi
+
+oauth {
+    providers {
+        twitter {
+            api = TwitterApi
+            key = 'my-key'
+            secret = 'my-secret'
+        }
+    }
+}
+{code}
+
+In this example, @twitter@ is the provider name you will use within your application. @api@ is the scribe provider class which relates to the oauth service you are trying to connect to, and is a subclass of @OauthService@. It can be anything you want. @key@ is the oauth-key you have been given by your provider and @secret@ is the oauth-secret you have been given by your provider. You will need to import this into your @application.groovy@ file using the standard java @import@ keyword.
+
+{note}
+Note that provider names are all lowercase - you don't necessarily need to lowercase them in your configuration, but when referencing them within the application, they have been lower cased for you. This means that 'MyProvider' becomes 'myprovider'.
 {note}
 
 h2. Adding success and failure URIs
 
 When connecting to providers, the @successUri@ and @failureUri@ are the endpoints which the user will get redirected back to if connection to the provider succeeds, or fails, respectively.
 
+{note}
+For brevity, the Groovy DSL for the configuration in @application.groovy@ is being used henceforth, but there is no stopping if the same configuration is desired to be used in @application.yml@.
+{note}
+
 {code}
-    oauth {
-        providers {
-            twitter {
-                api = TwitterApi
-                key = 'my-key'
-                secret = 'my-secret'
-                successUri = '/your/success/page'
-                failureUri = '/your/failure/page'
-            }
+oauth {
+    providers {
+        twitter {
+            api = TwitterApi
+            key = 'my-key'
+            secret = 'my-secret'
+            successUri = '/your/success/page'
+            failureUri = '/your/failure/page'
         }
     }
+}
 {code}
 
 At this stage, you can safely use the plugin with no further work!

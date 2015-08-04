@@ -9,12 +9,11 @@ import org.scribe.model.Verb
 import org.scribe.model.Verifier
 import org.scribe.oauth.OAuthService
 import org.springframework.beans.factory.InitializingBean
-
-import uk.co.desirableobjects.oauth.scribe.exception.InvalidOauthProviderException
 import uk.co.desirableobjects.oauth.scribe.exception.InvalidProviderClassException
 import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
-import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 import uk.co.desirableobjects.oauth.scribe.util.DynamicMethods
+import uk.co.desirableobjects.oauth.scribe.exception.InvalidOauthProviderException
+import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 
 class OauthService implements InitializingBean {
 

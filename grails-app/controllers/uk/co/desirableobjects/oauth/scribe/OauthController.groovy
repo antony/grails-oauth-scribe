@@ -2,12 +2,11 @@ package uk.co.desirableobjects.oauth.scribe
 
 import org.scribe.model.Token
 import org.scribe.model.Verifier
-import uk.co.desirableobjects.oauth.scribe.holder.RedirectHolder
-import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
+import grails.web.servlet.mvc.GrailsParameterMap
 import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
+import uk.co.desirableobjects.oauth.scribe.holder.RedirectHolder
 
 class OauthController {
-
     private static final Token EMPTY_TOKEN = new Token('', '')
 
     OauthService oauthService
@@ -31,16 +30,16 @@ class OauthController {
         if (!requestToken) {
             throw new MissingRequestTokenException(providerName)
         }
-        
+
         Token accessToken
 
         try {
             accessToken = oauthService.getAccessToken(providerName, requestToken, verifier)
-        } catch(OAuthException){
+        } catch (OAuthException) {
             log.error("Cannot authenticate with oauth")
             return redirect(uri: provider.failureUri)
         }
-        
+
         session[oauthService.findSessionKeyForAccessToken(providerName)] = accessToken
         session.removeAttribute(oauthService.findSessionKeyForRequestToken(providerName))
 
@@ -53,8 +52,8 @@ class OauthController {
         String verifierKey = determineVerifierKey(provider)
 
         if (!params[verifierKey]) {
-             log.error("Cannot authenticate with oauth: Could not find oauth verifier in ${params}.")
-             return null
+            log.error("Cannot authenticate with oauth: Could not find oauth verifier in ${params}.")
+            return null
         }
 
         String verification = params[verifierKey]
@@ -83,7 +82,5 @@ class OauthController {
 
         RedirectHolder.setUri(params.redirectUrl)
         return redirect(url: url)
-
     }
-
 }
