@@ -73,3 +73,16 @@ dependencies {
 task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
 }
+
+bintray {
+    pkg {
+        userOrg = 'desirable-objects' // If you want to publish to an organization
+        name = "desirableobjects.grails.plugins:$project.name"
+        issueTrackerUrl = "https://github.com/antony/grails-oauth-scribe/issues"
+        vcsUrl = "https://github.com/antony/grails-oauth-scribe"
+        version {
+            attributes = ['grails-plugin': "desirableobjects.grails.plugins:$project.name"]
+            name = project.version
+        }
+    }
+}
