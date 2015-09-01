@@ -75,7 +75,10 @@ task wrapper(type: Wrapper) {
 }
 
 bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
     pkg {
+        repo = 'grails-plugins'
         userOrg = 'desirable-objects' // If you want to publish to an organization
         name = "desirableobjects.grails.plugins:$project.name"
         issueTrackerUrl = "https://github.com/antony/grails-oauth-scribe/issues"
