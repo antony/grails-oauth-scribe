@@ -1,5 +1,6 @@
 package uk.co.desirableobjects.oauth.scribe
 
+import org.scribe.exceptions.OAuthException
 import org.scribe.model.Token
 import org.scribe.model.Verifier
 import grails.web.servlet.mvc.GrailsParameterMap
@@ -35,8 +36,8 @@ class OauthController {
 
         try {
             accessToken = oauthService.getAccessToken(providerName, requestToken, verifier)
-        } catch (OAuthException) {
-            log.error("Cannot authenticate with oauth")
+        } catch(OAuthException ex){
+            log.error("Cannot authenticate with oauth: ${ex.toString()}")
             return redirect(uri: provider.failureUri)
         }
 
