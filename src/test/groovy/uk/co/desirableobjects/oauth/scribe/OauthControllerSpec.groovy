@@ -109,7 +109,7 @@ class OauthControllerSpec extends Specification {
         2 * provider.service.getVersion() >> { return SupportedOauthVersion.TWO }
         1 * controller.oauthService.findProviderConfiguration(PROVIDER_NAME) >> { return provider }
         1 * controller.oauthService.findSessionKeyForRequestToken(PROVIDER_NAME) >> { return REQUEST_TOKEN_SESSION_KEY }
-        1 * controller.oauthService.getAccessToken(PROVIDER_NAME, requestToken, _ as Verifier) >> { throw new OAuthException() }
+        1 * controller.oauthService.getAccessToken(PROVIDER_NAME, requestToken, _ as Verifier) >> { throw new OAuthException('Anything') }
         0 * _
 
         then:
