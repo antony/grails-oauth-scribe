@@ -2,10 +2,15 @@ package uk.co.desirableobjects.oauth.scribe
 
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import org.scribe.model.Response
-import org.scribe.model.Token
-import org.scribe.model.Verifier
-import org.scribe.oauth.OAuthService
+import com.github.scribejava.core.model.Response
+import com.github.scribejava.core.model.OAuth1AccessToken
+import com.github.scribejava.core.model.OAuth1RequestToken
+import com.github.scribejava.core.model.OAuth2AccessToken
+import com.github.scribejava.core.model.OAuthConfig
+import com.github.scribejava.core.model.OAuthRequest
+import com.github.scribejava.core.model.Token
+import com.github.scribejava.core.oauth.OAuthService
+import com.github.scribejava.core.oauth.OAuth10aService
 import org.springframework.http.HttpStatus
 import spock.lang.Shared
 import spock.lang.Specification
@@ -28,37 +33,22 @@ class AuthorisationProcessSpec extends Specification {
 
                 given:
 
-//                    grailsApplication.config = [oauth:
-//                        [providers:
-//                            [twitter:[
-//                                    api: TwitterApi,
-//                                    key: 'myKey',
-//                                    secret: 'mySecret'
-//                                ]
-//                            ]
-//                        ]
-//                    ]
-
                     oaService = new OauthService()
                     oaService.grailsApplication = [config: [
                             oauth: [
                                 providers: [
                                     twitter: [
-                                        api: org.scribe.builder.api.TwitterApi,
+                                        api: com.github.scribejava.apis.TwitterApi,
                                         key: "myKey",
                                         secret: "mySecret" ] ]]]]
                     oaService.afterPropertiesSet()
 
-                    oaService.services.twitter.service = Mock(OAuthService)
+                    oaService.services.twitter.service = new MockOAuth1Service()
 
                 when:
                     requestToken = oaService.getTwitterRequestToken()
 
                 then:
-                    1 * oaService.services.twitter.service.getRequestToken() >> { return new Token('a', 'b', 'c') }
-                    0 * _
-
-                and:
                     requestToken.rawResponse == 'c'
 
         }
@@ -66,7 +56,8 @@ class AuthorisationProcessSpec extends Specification {
         def 'make the user validate our token'() {
 
             given:
-                oaService.services.twitter.service = Mock(OAuthService)
+                oaService.services.twitter.service = Mock(OAuth10aService)
+                requestToken = new OAuth1RequestToken('a', 'b', 'c')
 
             when:
                 String authUrl = oaService.getTwitterAuthorizationUrl(requestToken)
@@ -83,18 +74,13 @@ class AuthorisationProcessSpec extends Specification {
         def 'get the access token'() {
 
             given:
-                Token expectedToken = new Token('d', 'e', 'f')
-                Verifier verifier = new Verifier('abcde')
-                oaService.services.twitter.service = Mock(OAuthService)
+                String verifier = 'abcde'
+                oaService.services.twitter.service = new MockOAuth1Service()
 
             when:
                 accessToken = oaService.getTwitterAccessToken(requestToken, verifier)
 
            then:
-                1 * oaService.services.twitter.service.getAccessToken(requestToken, verifier) >> { return expectedToken }
-                0 * _
-
-           and:
                 accessToken.rawResponse == 'f'
 
         }
@@ -106,7 +92,6 @@ class AuthorisationProcessSpec extends Specification {
             given:
                 oaService.services.twitter.service = Mock(OAuthService)
                 oaService.oauthResourceService = Mock(OauthResourceService)
-                Response oaResponse = Mock(Response)
 
             and:
                 String expectedResponse = 'Hello There.'
@@ -117,19 +102,18 @@ class AuthorisationProcessSpec extends Specification {
 
             and:
                 def actualResponse = oaService."${verb}TwitterResourceWithPayload"(accessToken, DUMMY_OAUTH_RESOURCE_URI, payload, headers)
+                println "??" + actualResponse.code
                 body = actualResponse.body
                 code = actualResponse.code
 
             then:
                 1 * oaService.oauthResourceService.accessResource(oaService.services.twitter.service, accessToken, { ResourceAccessor ra ->
-                    ra.connectTimeout == 30000
-                    ra.receiveTimeout == 30000
                     ra.verb == verb
                     ra.url == DUMMY_OAUTH_RESOURCE_URI
                     ra.payload = payload?.bytes
-                } as ResourceAccessor) >> { return oaResponse }
-                1 * oaResponse.getBody() >> expectedResponse
-                1 * oaResponse.getCode() >> HttpStatus.OK.value()
+                } as ResourceAccessor) >> {
+                    return new Response(HttpStatus.OK.value(), '', [:], expectedResponse)
+                }
                 0 * _
 
             and:
@@ -152,7 +136,6 @@ class AuthorisationProcessSpec extends Specification {
         given:
             oaService.services.twitter.service = Mock(OAuthService)
             oaService.oauthResourceService = Mock(OauthResourceService)
-            Response oaResponse = Mock(Response)
 
         and:
             String expectedResponse = 'Hello There.'
@@ -168,15 +151,13 @@ class AuthorisationProcessSpec extends Specification {
 
         then:
             1 * oaService.oauthResourceService.accessResource(oaService.services.twitter.service, accessToken, { ResourceAccessor ra ->
-                ra.connectTimeout == 30000
-                ra.receiveTimeout == 30000
                 ra.verb == verb
                 ra.url == DUMMY_OAUTH_RESOURCE_URI
                 ra.bodyParameters == [a: 'b']
                 ra.headers == [Accept: 'application/pdf', 'Content-Type': 'application/json']
-            } as ResourceAccessor) >> { return oaResponse }
-            1 * oaResponse.getBody() >> expectedResponse
-            1 * oaResponse.getCode() >> HttpStatus.OK.value()
+            } as ResourceAccessor) >> {
+                return new Response(HttpStatus.OK.value(), '', [:], expectedResponse)
+            }
             0 * _
 
         and:

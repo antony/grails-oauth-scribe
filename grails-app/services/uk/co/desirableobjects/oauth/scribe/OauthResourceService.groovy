@@ -2,11 +2,11 @@ package uk.co.desirableobjects.oauth.scribe
 
 import java.util.concurrent.TimeUnit
 
-import org.scribe.model.OAuthRequest
-import org.scribe.model.Response
-import org.scribe.model.Token
-import org.scribe.model.Verb
-import org.scribe.oauth.OAuthService
+import com.github.scribejava.core.model.OAuthRequest
+import com.github.scribejava.core.model.Response
+import com.github.scribejava.core.model.Token
+import com.github.scribejava.core.model.Verb
+import com.github.scribejava.core.oauth.OAuthService
 
 import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 
@@ -16,11 +16,11 @@ class OauthResourceService {
 
     Response accessResource(OAuthService service, Token accessToken, ResourceAccessor ra) {
 
-        OAuthRequest req = buildOauthRequest(ra.verb, ra.url, ra.connectTimeout, ra.receiveTimeout)
-        
+        OAuthRequest req = buildOauthRequest(ra.verb, ra.url)
+
         if (ra.payload) {
-          req.addPayload(ra.payload)
-        } 
+          req.setPayload(ra.payload)
+        }
         ra.headers.each { String name, String value ->
             req.addHeader(name, value)
         }
@@ -34,19 +34,16 @@ class OauthResourceService {
 
     }
 
-    private OAuthRequest buildOauthRequest(Verb verb, String url, int connectTimeout, int receiveTimeout) {
+    private OAuthRequest buildOauthRequest(Verb verb, String url) {
 
-        OAuthRequest req = new OAuthRequest(verb, url)
-        req.setConnectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
-        req.setReadTimeout(receiveTimeout, TimeUnit.MILLISECONDS)
-        return req
+        return new OAuthRequest(verb, url)
 
     }
 
     private Response signAndSend(OAuthService service, Token accessToken, OAuthRequest req) {
 
         service.signRequest(accessToken, req)
-        return req.send()
+        return service.execute(req)
 
     }
 }
