@@ -1,13 +1,10 @@
 package uk.co.desirableobjects.oauth.scribe.resource
 
 import groovy.transform.EqualsAndHashCode
-import org.scribe.model.Verb
+import com.github.scribejava.core.model.Verb
 
 @EqualsAndHashCode
 class ResourceAccessor {
-
-    int connectTimeout
-    int receiveTimeout
 
     Verb verb
     String url

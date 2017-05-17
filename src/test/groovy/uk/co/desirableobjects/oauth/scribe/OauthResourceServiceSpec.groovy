@@ -1,11 +1,12 @@
 package uk.co.desirableobjects.oauth.scribe
 
 import grails.test.mixin.TestFor
-import org.scribe.model.OAuthRequest
-import org.scribe.model.Parameter
-import org.scribe.model.Token
-import org.scribe.model.Verb
-import org.scribe.oauth.OAuthService
+import com.github.scribejava.core.model.OAuth2AccessToken
+import com.github.scribejava.core.model.OAuthRequest
+import com.github.scribejava.core.model.Parameter
+import com.github.scribejava.core.model.Token
+import com.github.scribejava.core.model.Verb
+import com.github.scribejava.core.oauth.OAuthService
 import spock.lang.Specification
 import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 
@@ -19,22 +20,28 @@ class OauthResourceServiceSpec extends Specification {
         when:
         ResourceAccessor resourceAccessor = new ResourceAccessor()
         resourceAccessor.with {
-            connectTimeout = 5000
-            receiveTimeout = 5000
             verb = Verb.GET
             url = 'http://example.net/res'
             payload = 'Test'.bytes
             bodyParameters = [x: 'y']
             addHeader 'Accept', 'application/pdf'
         }
-        service.accessResource(parent, new Token('token', 'secret'), resourceAccessor)
+        service.accessResource(parent, new OAuth2AccessToken('token', 'secret'), resourceAccessor)
 
         then:
-        1 * parent.signRequest(new Token('token', 'secret'), { OAuthRequest req ->
+        1 * parent.signRequest(new OAuth2AccessToken('token', 'secret'), { OAuthRequest req ->
             req.verb == Verb.GET
             req.headers == ['Content-Length': '4', 'Accept': 'application/pdf']
             req.url == 'http://example.net/res'
-            req.bodyContents == 'Test'
+            req.getStringPayload() == 'Test'
+            req.bodyParams.size() == 1
+            req.bodyParams.contains(new Parameter('x', 'y'))
+        } as OAuthRequest)
+        1 * parent.execute({ OAuthRequest req ->
+            req.verb == Verb.GET
+            req.headers == ['Content-Length': '4', 'Accept': 'application/pdf']
+            req.url == 'http://example.net/res'
+            req.getStringPayload() == 'Test'
             req.bodyParams.size() == 1
             req.bodyParams.contains(new Parameter('x', 'y'))
         } as OAuthRequest)
@@ -50,8 +57,6 @@ class OauthResourceServiceSpec extends Specification {
         when:
         ResourceAccessor resourceAccessor = new ResourceAccessor()
         resourceAccessor.with {
-            connectTimeout = 5000
-            receiveTimeout = 5000
             verb = Verb.GET
             url = 'http://example.net/res'
             //payload = null
@@ -59,14 +64,22 @@ class OauthResourceServiceSpec extends Specification {
             addHeader 'Accept', 'application/pdf'
         }
         assert resourceAccessor.payload == null
-        service.accessResource(parent, new Token('token', 'secret'), resourceAccessor)
+        service.accessResource(parent, new OAuth2AccessToken('token', 'secret'), resourceAccessor)
 
         then:
-        1 * parent.signRequest(new Token('token', 'secret'), { OAuthRequest req ->
+        1 * parent.signRequest(new OAuth2AccessToken('token', 'secret'), { OAuthRequest req ->
             req.verb == Verb.GET
             req.headers == ['Content-Length': '4', 'Accept': 'application/pdf']
             req.url == 'http://example.net/res'
-            req.bodyContents == 'Test'
+            req.getStringPayload() == 'Test'
+            req.bodyParams.size() == 1
+            req.bodyParams.contains(new Parameter('x', 'y'))
+        } as OAuthRequest)
+        1 * parent.execute({ OAuthRequest req ->
+            req.verb == Verb.GET
+            req.headers == ['Content-Length': '4', 'Accept': 'application/pdf']
+            req.url == 'http://example.net/res'
+            req.getStringPayload() == 'Test'
             req.bodyParams.size() == 1
             req.bodyParams.contains(new Parameter('x', 'y'))
         } as OAuthRequest)
@@ -78,7 +91,7 @@ class OauthResourceServiceSpec extends Specification {
 
         given:
         OAuthService theParent = Mock(OAuthService)
-        Token aToken = new Token('token', 'secret')
+        Token aToken = new OAuth2AccessToken('token', 'secret')
 
         when: "the resource accessor has query string parameters"
         def resourceAccessor = new ResourceAccessor()

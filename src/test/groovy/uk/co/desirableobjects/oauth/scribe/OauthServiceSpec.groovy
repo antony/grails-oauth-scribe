@@ -1,13 +1,15 @@
 package uk.co.desirableobjects.oauth.scribe
 
 import grails.test.mixin.TestFor
-import org.scribe.builder.ServiceBuilder
-import org.scribe.builder.api.Api
-import org.scribe.builder.api.TwitterApi
-import org.scribe.model.OAuthConfig
-import org.scribe.model.Token
-import org.scribe.model.Verb
-import org.scribe.oauth.OAuthService
+import com.github.scribejava.apis.TwitterApi
+import com.github.scribejava.core.builder.ServiceBuilder
+import com.github.scribejava.core.builder.api.BaseApi
+import com.github.scribejava.core.model.OAuthConfig
+import com.github.scribejava.core.model.OAuth2AccessToken
+import com.github.scribejava.core.model.SignatureType
+import com.github.scribejava.core.model.Token
+import com.github.scribejava.core.model.Verb
+import com.github.scribejava.core.oauth.OAuthService
 import spock.lang.Specification
 import spock.lang.Unroll
 import uk.co.desirableobjects.oauth.scribe.exception.InvalidOauthProviderException
@@ -42,11 +44,11 @@ class OauthServiceSpec extends Specification {
                     oauth: [
                         providers: [
                             twitter: [
-                                api: org.scribe.builder.api.TwitterApi,
+                                api: com.github.scribejava.apis.TwitterApi,
                                 key: "twitter",
                                 secret: "identica" ],
                             facebook: [
-                                api: org.scribe.builder.api.FacebookApi,
+                                api: com.github.scribejava.apis.FacebookApi,
                                 key: "zuckerberg",
                                 secret: "brothers" ] ]]]]
             service.afterPropertiesSet()
@@ -64,11 +66,11 @@ class OauthServiceSpec extends Specification {
                     oauth: [
                         providers: [
                             twitter: [
-                                api: org.scribe.builder.api.TwitterApi,
+                                api: com.github.scribejava.apis.TwitterApi,
                                 key: "twitter",
                                 secret: "identica" ],
                             facebook: [
-                                api: org.scribe.builder.api.FacebookApi,
+                                api: com.github.scribejava.apis.FacebookApi,
                                 key: "zuckerberg",
                                 secret: "brothers" ] ]]]]
             service.afterPropertiesSet()
@@ -109,7 +111,7 @@ class OauthServiceSpec extends Specification {
                     oauth: [
                         providers: [
                             twitter: [
-                                api: org.scribe.builder.api.TwitterApi,
+                                api: com.github.scribejava.apis.TwitterApi,
                                 key: "myKey",
                                 secret: "mySecret" ] ],
                         debug: debug ] ]]
@@ -137,7 +139,7 @@ class OauthServiceSpec extends Specification {
                     oauth: [
                         providers: [
                             twitter: [
-                                api: org.scribe.builder.api.TwitterApi,
+                                api: com.github.scribejava.apis.TwitterApi,
                                 key: "myKey",
                                 secret: "mySecret",
                                 scope: scope ? 'testScope' : null ] ]]]]
@@ -206,11 +208,11 @@ class OauthServiceSpec extends Specification {
                     oauth: [
                         providers: [
                             twitter: [
-                                api: org.scribe.builder.api.TwitterApi,
+                                api: com.github.scribejava.apis.TwitterApi,
                                 key: key,
                                 secret: secret ],
                             facebook: [
-                                api: org.scribe.builder.api.FacebookApi,
+                                api: com.github.scribejava.apis.FacebookApi,
                                 key: "facebook-key",
                                 secret: "facebook-secret" ] ]]]]
 
@@ -237,11 +239,11 @@ class OauthServiceSpec extends Specification {
                     oauth: [
                         providers: [
                             twitter: [
-                                api: org.scribe.builder.api.TwitterApi,
+                                api: com.github.scribejava.apis.TwitterApi,
                                 key: 'myKey',
                                 secret: 'mySecret',
                                 callback: 'http://example.com:1234/url',
-                                signatureType: org.scribe.model.SignatureType.QueryString ] ]]]]
+                                signatureType: SignatureType.QueryString ] ]]]]
 
         expect:
             service.afterPropertiesSet() == null
@@ -256,7 +258,7 @@ class OauthServiceSpec extends Specification {
                     oauth: [
                         providers: [
                             twitter: [
-                                api: org.scribe.builder.api.TwitterApi,
+                                api: com.github.scribejava.apis.TwitterApi,
                                 key: 'myKey',
                                 secret: 'mySecret',
                                 successUri: '/coffee/tea',
@@ -280,7 +282,7 @@ class OauthServiceSpec extends Specification {
                     oauth: [
                         providers: [
                             twitter: [
-                                api: org.scribe.builder.api.TwitterApi,
+                                api: com.github.scribejava.apis.TwitterApi,
                                 key: 'myKey',
                                 secret: 'mySecret' ]],
                         connectTimeout: 5000,
@@ -294,13 +296,10 @@ class OauthServiceSpec extends Specification {
             service.receiveTimeout == 5000
 
         when:
-            service.getTwitterResource(new Token('myKey', 'mySecret'), 'http://www.example.com')
+            service.getTwitterResource(new OAuth2AccessToken('myKey', 'mySecret'), 'http://www.example.com')
 
         then:
-            1 * service.oauthResourceService.accessResource(_ as OAuthService, _ as Token, { ResourceAccessor ra ->
-                ra.connectTimeout == 5000
-                ra.receiveTimeout == 5000
-            } as ResourceAccessor)
+            1 * service.oauthResourceService.accessResource(_ as OAuthService, _ as Token, _ as ResourceAccessor)
             0 * _
 
     }
@@ -314,7 +313,7 @@ class OauthServiceSpec extends Specification {
                     oauth: [
                         providers: [
                             twitter: [
-                                api: org.scribe.builder.api.TwitterApi,
+                                api: com.github.scribejava.apis.TwitterApi,
                                 key: 'myKey',
                                 secret: 'mySecret',
                                 successUri: '/coffee/tea',
@@ -350,8 +349,8 @@ class OauthServiceSpec extends Specification {
 
         where:
             apiClass                              | apiVersion
-            'org.scribe.builder.api.TwitterApi'   | SupportedOauthVersion.ONE
-            'org.scribe.builder.api.FacebookApi'  | SupportedOauthVersion.TWO
+            'com.github.scribejava.apis.TwitterApi'   | SupportedOauthVersion.ONE
+            'com.github.scribejava.apis.FacebookApi'  | SupportedOauthVersion.TWO
 
     }
 
@@ -367,7 +366,7 @@ class OauthServiceSpec extends Specification {
 			aProvider.getService() >> theProviderService
 			service.services = [twitter: aProvider]
 		and: "the input parameters"
-			def theToken = new Token("a", "b")
+			def theToken = new OAuth2AccessToken("a", "b")
 			def theUrl = "http://someapi.net/api"
 			def theQuerystringParams = [param1:"value1", param2:"value2"]
 			def theExtraHeaders = [header1:"valueA", header2:"valueB"]
@@ -393,7 +392,7 @@ class OauthServiceSpec extends Specification {
 
     }
 
-    class CustomProviderApi implements Api {
+    class CustomProviderApi implements BaseApi {
 
         OAuthService createService(OAuthConfig oAuthConfig) {
             return null

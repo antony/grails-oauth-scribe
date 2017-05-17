@@ -1,14 +1,14 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import org.scribe.exceptions.OAuthException
-import org.scribe.model.Token
-import org.scribe.model.Verifier
+import com.github.scribejava.core.exceptions.OAuthException
+import com.github.scribejava.core.model.OAuth2AccessToken
+import com.github.scribejava.core.model.Token
 import grails.web.servlet.mvc.GrailsParameterMap
 import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenException
 import uk.co.desirableobjects.oauth.scribe.holder.RedirectHolder
 
 class OauthController {
-    private static final Token EMPTY_TOKEN = new Token('', '')
+    private static final Token EMPTY_TOKEN = new OAuth2AccessToken('', '')
 
     OauthService oauthService
 
@@ -17,7 +17,7 @@ class OauthController {
         String providerName = params.provider
         OauthProvider provider = oauthService.findProviderConfiguration(providerName)
 
-        Verifier verifier = extractVerifier(provider, params)
+        String verifier = extractVerifier(provider, params)
 
         if (!verifier) {
             redirect(uri: provider.failureUri)
@@ -25,7 +25,7 @@ class OauthController {
         }
 
         Token requestToken = provider.oauthVersion == SupportedOauthVersion.TWO ?
-            new Token(params?.code, "") :
+            EMPTY_TOKEN :
             (Token) session[oauthService.findSessionKeyForRequestToken(providerName)]
 
         if (!requestToken) {
@@ -35,7 +35,9 @@ class OauthController {
         Token accessToken
 
         try {
-            accessToken = oauthService.getAccessToken(providerName, requestToken, verifier)
+            accessToken = provider.oauthVersion == SupportedOauthVersion.ONE ?
+              oauthService.getAccessTokenForOAuth1(providerName, requestToken, verifier) :
+              oauthService.getAccessTokenForOAuth2(providerName, params?.code)
         } catch(OAuthException ex){
             log.error("Cannot authenticate with oauth: ${ex.toString()}")
             return redirect(uri: provider.failureUri)
@@ -48,7 +50,7 @@ class OauthController {
 
     }
 
-    private Verifier extractVerifier(OauthProvider provider, GrailsParameterMap params) {
+    private String extractVerifier(OauthProvider provider, GrailsParameterMap params) {
 
         String verifierKey = determineVerifierKey(provider)
 
@@ -57,8 +59,7 @@ class OauthController {
             return null
         }
 
-        String verification = params[verifierKey]
-        return new Verifier(verification)
+        return params[verifierKey]
 
     }
 
@@ -74,12 +75,15 @@ class OauthController {
         OauthProvider provider = oauthService.findProviderConfiguration(providerName)
 
         Token requestToken = EMPTY_TOKEN
+        String url
         if (provider.oauthVersion == SupportedOauthVersion.ONE) {
             requestToken = provider.service.requestToken
+            url = oauthService.getAuthorizationUrlForOAuth1(providerName, requestToken)
+        } else {
+            url = oauthService.getAuthorizationUrlForOAuth2(providerName)
         }
 
         session[oauthService.findSessionKeyForRequestToken(providerName)] = requestToken
-        String url = oauthService.getAuthorizationUrl(providerName, requestToken)
 
         RedirectHolder.setUri(params.redirectUrl)
         return redirect(url: url)
