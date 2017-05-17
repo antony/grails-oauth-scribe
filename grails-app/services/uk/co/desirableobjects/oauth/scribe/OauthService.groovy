@@ -1,13 +1,17 @@
 package uk.co.desirableobjects.oauth.scribe
 
 import org.codehaus.groovy.runtime.typehandling.GroovyCastException
-import org.scribe.builder.ServiceBuilder
-import org.scribe.exceptions.OAuthException
-import org.scribe.model.SignatureType
-import org.scribe.model.Token
-import org.scribe.model.Verb
-import org.scribe.model.Verifier
-import org.scribe.oauth.OAuthService
+import com.github.scribejava.core.builder.ServiceBuilder
+import com.github.scribejava.core.exceptions.OAuthException
+import com.github.scribejava.core.builder.api.BaseApi
+import com.github.scribejava.core.httpclient.jdk.JDKHttpClientConfig
+import com.github.scribejava.core.model.OAuth1AccessToken
+import com.github.scribejava.core.model.OAuth1RequestToken
+import com.github.scribejava.core.model.OAuth2AccessToken
+import com.github.scribejava.core.model.SignatureType
+import com.github.scribejava.core.model.Token
+import com.github.scribejava.core.model.Verb
+import com.github.scribejava.core.oauth.OAuthService
 import org.springframework.beans.factory.InitializingBean
 import uk.co.desirableobjects.oauth.scribe.exception.InvalidProviderClassException
 import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
@@ -78,14 +82,22 @@ class OauthService implements InitializingBean {
                     throw new InvalidProviderClassException(name, providerConfig.api)
                 }
 
+                if (!(api in BaseApi)) {
+                  throw new InvalidProviderClassException(name, providerConfig.api)
+                }
+
                 String callback = providerConfig.containsKey('callback') ? providerConfig.callback : null
                 SignatureType signatureType = providerConfig.containsKey('signatureType') ? providerConfig.signatureType : null
                 String scope = providerConfig.containsKey('scope') ? providerConfig.scope : null
 
+                final JDKHttpClientConfig clientConfig = JDKHttpClientConfig.defaultConfig()
+                clientConfig.setConnectTimeout(connectTimeout)
+                clientConfig.setReadTimeout(receiveTimeout)
+
                 ServiceBuilder serviceBuilder = new ServiceBuilder()
-                        .provider(api)
                         .apiKey(providerConfig.key as String)
                         .apiSecret(providerConfig.secret as String)
+                        .httpClientConfig(clientConfig)
 
                 if (callback) {
                     serviceBuilder.callback(callback)
@@ -104,7 +116,7 @@ class OauthService implements InitializingBean {
                 }
 
                 OauthProvider provider = new OauthProvider(
-                    service: serviceBuilder.build(),
+                    service: serviceBuilder.build(api.instance()),
                     successUri: providerConfig.successUri,
                     failureUri: providerConfig.failureUri
                 )
@@ -134,21 +146,33 @@ class OauthService implements InitializingBean {
         return conf
     }
 
-    private Token getRequestToken(String serviceName) {
+    private OAuth1RequestToken getRequestToken(String serviceName) {
 
         return findService(serviceName).getRequestToken()
 
     }
 
-    String getAuthorizationUrl(String serviceName, Token token) {
+    String getAuthorizationUrlForOAuth1(String serviceName, OAuth1RequestToken token) {
 
         return findService(serviceName).getAuthorizationUrl(token)
 
     }
 
-    Token getAccessToken(String serviceName, Token token, Verifier verifier) {
+    String getAuthorizationUrlForOAuth2(String serviceName) {
+
+        return findService(serviceName).getAuthorizationUrl()
+
+    }
+
+    OAuth1AccessToken getAccessTokenForOAuth1(String serviceName, OAuth1RequestToken token, String verifier) {
 
         return findService(serviceName).getAccessToken(token, verifier)
+
+    }
+
+    OAuth2AccessToken getAccessTokenForOAuth2(String serviceName, String code) {
+
+        return findService(serviceName).getAccessToken(code)
 
     }
 
@@ -164,14 +188,22 @@ class OauthService implements InitializingBean {
        if( name ==~ /^.*AuthorizationUrl/) {
 
             String provider = DynamicMethods.extractKeyword(name, /^get(.*)AuthorizationUrl/)
-            return getAuthorizationUrl(provider, args[0])
+            if (args[0]) {
+              return getAuthorizationUrlForOAuth1(provider, args[0])
+            } else {
+              return getAuthorizationUrlForOAuth2(provider)
+            }
 
        }
 
        if( name ==~ /^.*AccessToken/) {
 
             String provider = DynamicMethods.extractKeyword(name, /^get(.*)AccessToken/)
-            return getAccessToken(provider, args[0], args[1])
+            if (args[1]) {
+              return getAccessTokenForOAuth1(provider, args[0], args[1])
+            } else {
+              return getAccessTokenForOAuth2(provider, args[0])
+            }
 
        }
 
@@ -184,8 +216,6 @@ class OauthService implements InitializingBean {
               OAuthService service = findService(serviceName)
 
                ResourceAccessor resourceAccessor = new ResourceAccessor(
-                       connectTimeout: connectTimeout,
-                       receiveTimeout: receiveTimeout,
                        verb: actualVerb,
                        url: args[1] as String,
                        bodyParameters: (args.length > 2) ? args[2] as Map : null
@@ -209,8 +239,6 @@ class OauthService implements InitializingBean {
             OAuthService service = findService(serviceName)
 
             ResourceAccessor resourceAccessor = new ResourceAccessor(
-                    connectTimeout: connectTimeout,
-                    receiveTimeout: receiveTimeout,
                     verb: actualVerb,
                     url: args[1] as String,
                     payload: (args[2] as String).bytes,
@@ -233,8 +261,6 @@ class OauthService implements InitializingBean {
 		    OAuthService service = findService(serviceName)
 
 		    ResourceAccessor resourceAccessor = new ResourceAccessor(
-				    connectTimeout: connectTimeout,
-				    receiveTimeout: receiveTimeout,
 				    verb: actualVerb,
 				    url: args[1] as String,
 				    querystringParams: (args.length > 2) ? args[2] as Map<String, String> : null

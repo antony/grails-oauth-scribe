@@ -1,10 +1,13 @@
 package uk.co.desirableobjects.oauth.scribe
 
 import grails.test.mixin.TestFor
-import org.scribe.exceptions.OAuthException
-import org.scribe.model.Token
-import org.scribe.model.Verifier
-import org.scribe.oauth.OAuthService
+import com.github.scribejava.core.exceptions.OAuthException
+import com.github.scribejava.core.model.OAuth1AccessToken
+import com.github.scribejava.core.model.OAuth1RequestToken
+import com.github.scribejava.core.model.OAuth2AccessToken
+import com.github.scribejava.core.model.Token
+import com.github.scribejava.core.oauth.OAuthService
+import com.github.scribejava.core.oauth.OAuth10aService
 import org.springframework.web.context.request.RequestContextHolder
 import spock.lang.Shared
 import spock.lang.Specification
@@ -25,7 +28,7 @@ class OauthControllerSpec extends Specification {
 
     def setup() {
 
-        service = Mock(OAuthService)
+        service = Mock(OAuth10aService)
         provider = new OauthProvider(service: service, failureUri: '/coke/pepsi', successUri: '/coffee/tea')
         controller.oauthService = Mock(OauthService)
 
@@ -49,13 +52,13 @@ class OauthControllerSpec extends Specification {
 
         given:
 
-        Token requestToken = new Token('a', 'b', 'c')
+        Token requestToken = new OAuth1RequestToken('a', 'b', 'c')
         controller.session[REQUEST_TOKEN_SESSION_KEY] = requestToken
 
         and:
 
-        Token accessToken = new Token('d', 'e', 'f')
-        Verifier verifier = new Verifier('xyz')
+        Token accessToken = new OAuth1AccessToken('d', 'e', 'f')
+        String verifier = 'xyz'
 
         and:
 
@@ -68,10 +71,10 @@ class OauthControllerSpec extends Specification {
 
         then:
 
-        2 * provider.service.getVersion() >> { return SupportedOauthVersion.TWO }
+        3 * provider.service.getVersion() >> { return SupportedOauthVersion.ONE.scribeVersion }
         2 * controller.oauthService.findSessionKeyForRequestToken(PROVIDER_NAME) >> { return REQUEST_TOKEN_SESSION_KEY }
         1 * controller.oauthService.findSessionKeyForAccessToken(PROVIDER_NAME) >> { return ACCESS_TOKEN_SESSION_KEY }
-        1 * controller.oauthService.getAccessToken(PROVIDER_NAME, requestToken, _ as Verifier) >> { return accessToken }
+        1 * controller.oauthService.getAccessTokenForOAuth1(PROVIDER_NAME, requestToken, _ as String) >> { return accessToken }
         1 * controller.oauthService.findProviderConfiguration(PROVIDER_NAME) >> { return provider }
         0 * _
 
@@ -87,18 +90,18 @@ class OauthControllerSpec extends Specification {
 
         given:
 
-        Token requestToken = new Token('a', 'b', 'c')
+        Token requestToken = new OAuth2AccessToken('a', 'b')
         controller.session[REQUEST_TOKEN_SESSION_KEY] = requestToken
 
         and:
 
-        Token accessToken = new Token('d', 'e', 'f')
-        Verifier verifier = new Verifier('xyz')
+        Token accessToken = new OAuth2AccessToken('d', 'e')
+        String code = 'xyz'
 
         and:
 
         controller.params.provider = PROVIDER_NAME
-        controller.params.oauth_verifier = verifier.value
+        controller.params.code = code
 
         when:
 
@@ -106,10 +109,9 @@ class OauthControllerSpec extends Specification {
 
         then:
 
-        2 * provider.service.getVersion() >> { return SupportedOauthVersion.TWO }
+        3 * provider.service.getVersion() >> { return SupportedOauthVersion.TWO.scribeVersion }
         1 * controller.oauthService.findProviderConfiguration(PROVIDER_NAME) >> { return provider }
-        1 * controller.oauthService.findSessionKeyForRequestToken(PROVIDER_NAME) >> { return REQUEST_TOKEN_SESSION_KEY }
-        1 * controller.oauthService.getAccessToken(PROVIDER_NAME, requestToken, _ as Verifier) >> { throw new OAuthException('Anything') }
+        1 * controller.oauthService.getAccessTokenForOAuth2(PROVIDER_NAME, code) >> { throw new OAuthException('Anything') }
         0 * _
 
         then:
@@ -143,8 +145,9 @@ class OauthControllerSpec extends Specification {
 
         given:
 
-        Token requestToken = new Token('a', 'b', 'c')
-
+        MockOAuth1Service mockService = new MockOAuth1Service()
+        Token requestToken = mockService.getRequestToken()
+        provider.service = mockService
 
         when:
 
@@ -153,11 +156,9 @@ class OauthControllerSpec extends Specification {
 
         then:
 
-        1 * service.getRequestToken() >> { return requestToken }
         1 * controller.oauthService.findProviderConfiguration(PROVIDER_NAME) >> { return provider }
         1 * controller.oauthService.findSessionKeyForRequestToken(PROVIDER_NAME) >> { return REQUEST_TOKEN_SESSION_KEY }
-        1 * provider.service.version >> { return '1.0' }
-        1 * controller.oauthService.getAuthorizationUrl(PROVIDER_NAME, requestToken) >> { return 'http://authorisation.url/auth' }
+        1 * controller.oauthService.getAuthorizationUrlForOAuth1(PROVIDER_NAME, requestToken) >> { return 'http://authorisation.url/auth' }
         0 * _
 
         and:
@@ -173,8 +174,10 @@ class OauthControllerSpec extends Specification {
         given:
 
         def redirectUri = "/controller/action/id"
-        def requestToken = new Token('a', 'b', 'c')
         controller.params.redirectUrl = redirectUri
+        MockOAuth1Service mockService = new MockOAuth1Service()
+        Token requestToken = mockService.getRequestToken()
+        provider.service = mockService
 
         when:
 
@@ -183,12 +186,9 @@ class OauthControllerSpec extends Specification {
 
         then:
 
-
-        1 * service.getRequestToken() >> { return requestToken }
         1 * controller.oauthService.findProviderConfiguration(PROVIDER_NAME) >> { return provider }
         1 * controller.oauthService.findSessionKeyForRequestToken(PROVIDER_NAME) >> { return REQUEST_TOKEN_SESSION_KEY }
-        1 * provider.service.version >> { return '1.0' }
-        1 * controller.oauthService.getAuthorizationUrl(PROVIDER_NAME, requestToken) >> { return 'http://authorisation.url/auth' }
+        1 * controller.oauthService.getAuthorizationUrlForOAuth1(PROVIDER_NAME, requestToken) >> { return 'http://authorisation.url/auth' }
         0 * _
 
         and:
@@ -214,7 +214,7 @@ class OauthControllerSpec extends Specification {
         1 * controller.oauthService.findProviderConfiguration(PROVIDER_NAME) >> { return provider }
         1 * provider.service.version >> { return '2.0' }
         1 * controller.oauthService.findSessionKeyForRequestToken(PROVIDER_NAME) >> { return REQUEST_TOKEN_SESSION_KEY }
-        1 * controller.oauthService.getAuthorizationUrl(PROVIDER_NAME, emptyToken) >> { return 'http://authorisation.url/auth' }
+        1 * controller.oauthService.getAuthorizationUrlForOAuth2(PROVIDER_NAME) >> { return 'http://authorisation.url/auth' }
         0 * _
 
         and:

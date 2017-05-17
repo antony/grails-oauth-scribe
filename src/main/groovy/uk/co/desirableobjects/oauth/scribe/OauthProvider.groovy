@@ -1,6 +1,6 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import org.scribe.oauth.OAuthService
+import com.github.scribejava.core.oauth.OAuthService
 
 class OauthProvider {
 

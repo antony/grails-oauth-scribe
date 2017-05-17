@@ -2,7 +2,8 @@ package uk.co.desirableobjects.oauth.scribe
 
 import grails.test.mixin.TestFor
 import org.grails.taglib.GrailsTagException
-import org.scribe.model.Token
+import com.github.scribejava.core.model.OAuth2AccessToken
+import com.github.scribejava.core.model.Token
 import spock.lang.Specification
 
 @TestFor(OauthTagLib)
@@ -41,9 +42,9 @@ class OauthTagLibSpec extends Specification {
             tagLib.oauthService = new OauthService()
             tagLib.oauthService.findSessionKeyForAccessToken('twitter') >> { return 'twitter:oasAccessToken' }
 
-        and: 
+        and:
 
-            tagLib.session['twitter:oasAccessToken'] = new Token('a', 'b', 'c')
+            tagLib.session['twitter:oasAccessToken'] = new OAuth2AccessToken('a', 'b')
 
         when:
 
@@ -62,7 +63,7 @@ class OauthTagLibSpec extends Specification {
             tagLib.oauthService = new OauthService()
             tagLib.oauthService.findSessionKeyForAccessToken('twitter') >> { return 'twitter:oasAccessToken' }
 
-        and: 
+        and:
 
             tagLib.session['twitter:oasAccessToken'] = null
 
@@ -83,9 +84,9 @@ class OauthTagLibSpec extends Specification {
             tagLib.oauthService = new OauthService()
             tagLib.oauthService.findSessionKeyForAccessToken('twitter') >> { return 'twitter:oasAccessToken' }
 
-        and: 
+        and:
 
-            tagLib.session['twitter:oasAccessToken'] = new Token('a', 'b', 'c')
+            tagLib.session['twitter:oasAccessToken'] = new OAuth2AccessToken('a', 'b')
 
         when:
 
@@ -104,7 +105,7 @@ class OauthTagLibSpec extends Specification {
             tagLib.oauthService = new OauthService()
             tagLib.oauthService.findSessionKeyForAccessToken('twitter') >> { return 'twitter:oasAccessToken' }
 
-        and: 
+        and:
 
             tagLib.session['twitter:oasAccessToken'] = null
 

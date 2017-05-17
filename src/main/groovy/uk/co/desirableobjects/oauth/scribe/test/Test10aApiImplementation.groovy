@@ -1,6 +1,6 @@
 package uk.co.desirableobjects.oauth.scribe.test
 
-import org.scribe.builder.api.DefaultApi10a
+import com.github.scribejava.core.builder.api.DefaultApi10a
 
 class Test10aApiImplementation extends DefaultApi10a {
 
@@ -15,7 +15,7 @@ class Test10aApiImplementation extends DefaultApi10a {
     }
 
     @Override
-    String getAuthorizationUrl(org.scribe.model.Token token) {
+    String getAuthorizationUrl(com.github.scribejava.core.model.OAuth1RequestToken token) {
         return null
     }
 
