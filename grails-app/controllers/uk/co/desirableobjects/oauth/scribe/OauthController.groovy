@@ -73,9 +73,40 @@ class OauthController {
         String providerName = params.provider
         OauthProvider provider = oauthService.findProviderConfiguration(providerName)
 
+        if ( grailsApplication.config.grails.plugin.springsecurity.oauth.setCallbackDynamically ) {
+            ServiceBuilder serviceBuilder = new ServiceBuilder()
+                    .provider( provider.service.api.class )
+                    .apiKey( provider.service.config.apiKey as String )
+                    .apiSecret( provider.service.config.apiSecret as String )
+
+            if ( provider.service.config.callback ) {
+                String referer = request.getHeader( "referer" )
+                String callbackPrefix = referer.replaceAll( new URL( referer ).getPath(), "" )
+                serviceBuilder.callback( callbackPrefix + ( grailsApplication.config.oauth.providers[providerName].callback as String ) )
+            }
+
+            if ( provider.service.config.signatureType ) {
+                serviceBuilder.signatureType( provider.service.config.signatureType as SignatureType )
+            }
+
+            if ( provider.service.config.scope ) {
+                serviceBuilder.scope( provider.service.config.scope as String )
+            }
+
+            provider = new OauthProvider(
+                    service: serviceBuilder.build(),
+                    successUri: provider.successUri,
+                    failureUri: provider.failureUri
+            )
+        }
+
         Token requestToken = EMPTY_TOKEN
         if (provider.oauthVersion == SupportedOauthVersion.ONE) {
             requestToken = provider.service.requestToken
+        }
+        
+        if ( grailsApplication.config.grails.plugin.springsecurity.oauth.setCallbackDynamically ) {
+            oauthService.services[providerName] = provider
         }
 
         session[oauthService.findSessionKeyForRequestToken(providerName)] = requestToken
