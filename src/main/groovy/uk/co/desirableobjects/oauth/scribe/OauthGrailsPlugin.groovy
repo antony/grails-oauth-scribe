@@ -1,9 +1,10 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import grails.plugins.*
+
+import grails.plugins.Plugin
 
 class OauthGrailsPlugin extends Plugin {
-    def grailsVersion = "3.0.0 > *"
+    def grailsVersion = "4.0.0 > *"
     def author = "Antony Jones, Peter Ledbrook"
     def authorEmail = "aj@desirableobjects.co.uk"
     def title = "Oauth Plugin"

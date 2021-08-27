@@ -1,7 +1,4 @@
 buildscript {
-    ext {
-        grailsVersion = project.grailsVersion
-    }
     repositories {
         mavenLocal()
         maven { url "https://repo.grails.org/grails/core" }
@@ -11,33 +8,19 @@ buildscript {
     }
 }
 
-plugins {
-    id "io.spring.dependency-management" version "0.5.2.RELEASE"
-    id "com.jfrog.bintray" version "1.2"
-}
-
 version "4.0.0"
 group "org.grails.plugins"
 
 apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: "spring-boot"
-apply plugin: "org.grails.grails-plugin"
-apply plugin: "org.grails.grails-gsp"
+apply plugin: "io.spring.dependency-management"
+apply plugin:"org.grails.grails-plugin"
+apply plugin:"org.grails.grails-gsp"
 apply plugin: "org.grails.grails-doc"
-// Used for publishing to central repository, remove if not needed
-apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/grailsCentralPublishing.gradle'
-apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
 
-ext {
-    grailsVersion = project.grailsVersion
-    gradleWrapperVersion = project.gradleWrapperVersion
-}
-
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenLocal()
@@ -54,39 +37,47 @@ dependencyManagement {
     applyMavenExclusions false
 }
 
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
 dependencies {
-    provided 'org.springframework.boot:spring-boot-starter-logging'
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
     provided "org.springframework.boot:spring-boot-starter-actuator"
     provided "org.springframework.boot:spring-boot-autoconfigure"
     provided "org.springframework.boot:spring-boot-starter-tomcat"
+    provided "org.springframework.boot:spring-boot-starter-logging"
     provided "org.grails:grails-web-boot"
     provided "org.grails:grails-dependencies"
     provided 'javax.servlet:javax.servlet-api:3.1.0'
-    testCompile "org.grails:grails-plugin-testing"
     console "org.grails:grails-console"
+    profile "org.grails.profiles:web-plugin"
+    testCompile "org.grails:grails-web-testing-support"
 
     compile 'com.github.scribejava:scribejava-apis:4.0.0'
     compile 'com.github.scribejava:scribejava-core:4.0.0'
-    testCompile 'org.gmock:gmock:0.8.2'
     testCompile 'org.objenesis:objenesis:1.2'
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = gradleWrapperVersion
+bootRun {
+    ignoreExitValue true
+    jvmArgs(
+        '-Dspring.output.ansi.enabled=always', 
+        '-noverify', 
+        '-XX:TieredStopAtLevel=1',
+        '-Xmx1024m')
+    sourceResources sourceSets.main
+    String springProfilesActive = 'spring.profiles.active'
+    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
 }
 
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-    pkg {
-        repo = 'grails-plugins'
-        userOrg = 'desirable-objects' // If you want to publish to an organization
-        name = "desirableobjects.grails.plugins:$project.name"
-        issueTrackerUrl = "https://github.com/antony/grails-oauth-scribe/issues"
-        vcsUrl = "https://github.com/antony/grails-oauth-scribe"
-        version {
-            attributes = ['grails-plugin': "desirableobjects.grails.plugins:$project.name"]
-            name = project.version
-        }
+tasks.withType(GroovyCompile) {
+    configure(groovyOptions) {
+        forkOptions.jvmArgs = ['-Xmx1024m']
     }
 }
+// enable if you wish to package this plugin as a standalone application
+bootJar.enabled = false

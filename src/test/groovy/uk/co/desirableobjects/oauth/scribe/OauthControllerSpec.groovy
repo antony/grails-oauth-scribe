@@ -1,13 +1,13 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import grails.test.mixin.TestFor
 import com.github.scribejava.core.exceptions.OAuthException
 import com.github.scribejava.core.model.OAuth1AccessToken
 import com.github.scribejava.core.model.OAuth1RequestToken
 import com.github.scribejava.core.model.OAuth2AccessToken
 import com.github.scribejava.core.model.Token
-import com.github.scribejava.core.oauth.OAuthService
 import com.github.scribejava.core.oauth.OAuth10aService
+import com.github.scribejava.core.oauth.OAuthService
+import grails.testing.web.controllers.ControllerUnitTest
 import org.springframework.web.context.request.RequestContextHolder
 import spock.lang.Shared
 import spock.lang.Specification
@@ -16,15 +16,16 @@ import uk.co.desirableobjects.oauth.scribe.exception.MissingRequestTokenExceptio
 import uk.co.desirableobjects.oauth.scribe.exception.UnknownProviderException
 import uk.co.desirableobjects.oauth.scribe.holder.RedirectHolder
 
-@TestFor(OauthController)
-class OauthControllerSpec extends Specification {
+class OauthControllerSpec extends Specification implements ControllerUnitTest<OauthController> {
 
     private static final String REQUEST_TOKEN_SESSION_KEY = 'twitter:oasRequestToken'
     private static final String ACCESS_TOKEN_SESSION_KEY = 'twitter:oasAccessToken'
     private static final String PROVIDER_NAME = 'twitter'
 
-    @Shared OauthProvider provider
-    @Shared OAuthService service
+    @Shared
+    OauthProvider provider
+    @Shared
+    OAuthService service
 
     def setup() {
 
