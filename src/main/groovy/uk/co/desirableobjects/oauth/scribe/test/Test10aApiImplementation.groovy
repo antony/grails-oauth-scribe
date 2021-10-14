@@ -1,9 +1,9 @@
 package uk.co.desirableobjects.oauth.scribe.test
 
 import com.github.scribejava.core.builder.api.DefaultApi10a
+import com.github.scribejava.core.model.OAuth1RequestToken
 
 class Test10aApiImplementation extends DefaultApi10a {
-
     @Override
     String getRequestTokenEndpoint() {
         return null
@@ -15,8 +15,7 @@ class Test10aApiImplementation extends DefaultApi10a {
     }
 
     @Override
-    String getAuthorizationUrl(com.github.scribejava.core.model.OAuth1RequestToken token) {
+    String getAuthorizationUrl(OAuth1RequestToken token) {
         return null
     }
-
 }

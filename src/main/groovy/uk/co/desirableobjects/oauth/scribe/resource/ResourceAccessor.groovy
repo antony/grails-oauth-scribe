@@ -1,17 +1,16 @@
 package uk.co.desirableobjects.oauth.scribe.resource
 
-import groovy.transform.EqualsAndHashCode
 import com.github.scribejava.core.model.Verb
+import groovy.transform.EqualsAndHashCode
 
 @EqualsAndHashCode
 class ResourceAccessor {
-
     Verb verb
     String url
     byte[] payload
     Map<String, String> headers = [:]
     Map<String, String> bodyParameters = [:]
-	Map<String, String> querystringParams = [:]
+    Map<String, String> querystringParams = [:]
 
     void setPayload(byte[] data) {
         headers.put('Content-Length', data.length as String)
@@ -25,5 +24,4 @@ class ResourceAccessor {
     void addHeader(String name, String value) {
         headers.put(name, value)
     }
-
 }

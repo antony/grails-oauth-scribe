@@ -15,5 +15,4 @@ enum SupportedOauthVersion {
             supportedVersion.scribeVersion == versionString
         }
     }
-
 }

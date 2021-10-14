@@ -7,7 +7,7 @@ class RedirectHolder {
     private static def URI_NAME = "uri"
     private static def DEFAULT_URI = "/"
 
-    public static void setUri(uri) {
+    static void setUri(uri) {
         if (!uri || uri.empty) {
             return
         }
@@ -15,11 +15,11 @@ class RedirectHolder {
         getOrCreateRedirectHash().putAt(URI_NAME, uri)
     }
 
-    public static def getRedirect() {
+    static def getRedirect() {
         return getStorage().getAt(HASH_NAME) ?: getDefaultRedirect()
     }
 
-    public static void setRedirectHash(redirectHash) {
+    static void setRedirectHash(redirectHash) {
         if (redirectHash) {
             getOrCreateRedirectHash().putAll(redirectHash)
         }

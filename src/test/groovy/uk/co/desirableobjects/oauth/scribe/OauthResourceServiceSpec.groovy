@@ -1,17 +1,12 @@
 package uk.co.desirableobjects.oauth.scribe
 
-import grails.test.mixin.TestFor
-import com.github.scribejava.core.model.OAuth2AccessToken
-import com.github.scribejava.core.model.OAuthRequest
-import com.github.scribejava.core.model.Parameter
-import com.github.scribejava.core.model.Token
-import com.github.scribejava.core.model.Verb
+import com.github.scribejava.core.model.*
 import com.github.scribejava.core.oauth.OAuthService
+import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 import uk.co.desirableobjects.oauth.scribe.resource.ResourceAccessor
 
-@TestFor(OauthResourceService)
-class OauthResourceServiceSpec extends Specification {
+class OauthResourceServiceSpec extends Specification implements ServiceUnitTest<OauthResourceService> {
 
     def 'User can set headers on oauth request'() {
         given:
